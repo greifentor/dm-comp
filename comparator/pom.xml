@@ -12,8 +12,8 @@
 	<artifactId>dm-comp-comparator</artifactId>
 	<packaging>jar</packaging>
 
-	<name>dm-comp-comparator</name>
-	<description>DM-Comp (Comparator)</description>
+	<name>DM-Comp (Comparator)</name>
+	<description>The comparator software.</description>
 
 	<properties>
 		<java.version>11</java.version>

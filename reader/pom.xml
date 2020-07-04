@@ -12,8 +12,8 @@
 	<artifactId>dm-comp-reader</artifactId>
 	<packaging>jar</packaging>
 
-	<name>dm-comp-reader</name>
-	<description>DM-Comp (Reader)</description>
+	<name>DM-Comp (Reader)</name>
+	<description>Some data model readers (e. g. for Liquibase).</description>
 
 	<properties>
 		<java.version>11</java.version>

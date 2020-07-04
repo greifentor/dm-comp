@@ -12,8 +12,8 @@
 	<artifactId>dm-comp-writer</artifactId>
 	<packaging>jar</packaging>
 
-	<name>dm-comp-writer</name>
-	<description>DM-Comp (Writer)</description>
+	<name>DM-Comp (Writer)</name>
+	<description>Writers for data model comparison results (e. g. for Liquibase).</description>
 
 	<properties>
 		<java.version>11</java.version>

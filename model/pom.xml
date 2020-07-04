@@ -12,8 +12,8 @@
 	<artifactId>dm-comp-model</artifactId>
 	<packaging>jar</packaging>
 
-	<name>dm-comp-model</name>
-	<description>DM-Comp (Model)</description>
+	<name>DM-Comp (Model)</name>
+	<description>The model classes and interfaces for comparison and results.</description>
 
 	<properties>
 		<java.version>11</java.version>

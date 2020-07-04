@@ -13,8 +13,8 @@
     <version>${global.version}</version>
     <packaging>pom</packaging>
 
-    <name>dm-comp</name>
-    <description>DM-Comp</description>
+    <name>DM-Comp</name>
+    <description>A comparator for data models.</description>
 
   <properties>
     <global.version>1.0.0</global.version>
