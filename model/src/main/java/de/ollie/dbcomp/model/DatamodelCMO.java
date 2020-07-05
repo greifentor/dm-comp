@@ -15,21 +15,21 @@ import lombok.experimental.Accessors;
  */
 @Accessors(chain = true)
 @Data
-public class DatabaseCMO {
+public class DatamodelCMO {
 
 	private Map<String, SchemeCMO> schemes = new HashMap<>();
 
-	private DatabaseCMO() {
+	private DatamodelCMO() {
 		super();
 	}
 
-	public static DatabaseCMO of(SchemeCMO schemes) {
-		return new DatabaseCMO() //
+	public static DatamodelCMO of(SchemeCMO... schemes) {
+		return new DatamodelCMO() //
 				.addSchemes(schemes) //
 		;
 	}
 
-	public DatabaseCMO addSchemes(SchemeCMO... schemes) {
+	public DatamodelCMO addSchemes(SchemeCMO... schemes) {
 		for (SchemeCMO scheme : schemes) {
 			this.schemes.put(scheme.getName(), scheme);
 		}
