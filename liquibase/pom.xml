@@ -9,11 +9,11 @@
 		<version>${global.version}</version>
 	</parent>
 
-	<artifactId>dm-comp-writer</artifactId>
+	<artifactId>dm-comp-liquibase</artifactId>
 	<packaging>jar</packaging>
 
-	<name>DM-Comp (Writer)</name>
-	<description>Writers for data model comparison results (e. g. for Liquibase).</description>
+	<name>DM-Comp (Liquibase)</name>
+	<description>Classes for using DB-Comp with Liquibase.</description>
 
 	<properties>
 		<java.version>11</java.version>
