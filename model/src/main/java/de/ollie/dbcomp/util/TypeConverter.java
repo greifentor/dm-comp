@@ -8,7 +8,7 @@ import java.sql.Types;
  * @author ollie (06.07.2020)
  *
  */
-public class DBTypeConverter {
+public class TypeConverter {
 
 	/**
 	 * Converts the passed Types value to an DBType enum.

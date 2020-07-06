@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 @Data
 public class ColumnCMO {
 
-	private boolean autoIncrement;
+	private Boolean autoIncrement;
 	private String name;
 	private TypeCMO type;
 
@@ -21,7 +21,7 @@ public class ColumnCMO {
 		super();
 	}
 
-	public static ColumnCMO of(String name, TypeCMO type, boolean autoIncrement) {
+	public static ColumnCMO of(String name, TypeCMO type, Boolean autoIncrement) {
 		return new ColumnCMO() //
 				.setAutoIncrement(autoIncrement) //
 				.setName(name) //

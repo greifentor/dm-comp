@@ -20,10 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
  *
  */
 @ExtendWith(MockitoExtension.class)
-public class DBTypeConverterTest {
+public class TypeConverterTest {
 
 	@InjectMocks
-	private DBTypeConverter unitUnderTest;
+	private TypeConverter unitUnderTest;
 
 	@Test
 	public void convertInt_PassedAnInvalidValue_ThrowsException() {

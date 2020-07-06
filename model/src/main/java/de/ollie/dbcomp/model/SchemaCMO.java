@@ -15,29 +15,29 @@ import lombok.experimental.Accessors;
  */
 @Accessors(chain = true)
 @Data
-public class SchemeCMO {
+public class SchemaCMO {
 
 	private String name;
 	private Map<String, TableCMO> tables = new HashMap<>();
 
-	private SchemeCMO() {
+	private SchemaCMO() {
 		super();
 	}
 
-	public static SchemeCMO of(String name, TableCMO... tables) {
-		return new SchemeCMO() //
+	public static SchemaCMO of(String name, TableCMO... tables) {
+		return new SchemaCMO() //
 				.addTables(tables) //
 				.setName(name) //
 		;
 	}
 
-	public static SchemeCMO of(TableCMO tables) {
-		return new SchemeCMO() //
+	public static SchemaCMO of(TableCMO tables) {
+		return new SchemaCMO() //
 				.addTables(tables) //
 		;
 	}
 
-	public SchemeCMO addTables(TableCMO... tables) {
+	public SchemaCMO addTables(TableCMO... tables) {
 		for (TableCMO table : tables) {
 			this.tables.put(table.getName(), table);
 		}

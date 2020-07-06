@@ -3,9 +3,12 @@ package de.ollie.dbcomp.liquibase.reader;
 import java.io.File;
 import java.sql.Types;
 
+import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DatamodelCMO;
-import de.ollie.dbcomp.model.SchemeCMO;
-import de.ollie.dbcomp.util.DBTypeConverter;
+import de.ollie.dbcomp.model.SchemaCMO;
+import de.ollie.dbcomp.model.TableCMO;
+import de.ollie.dbcomp.model.TypeCMO;
+import de.ollie.dbcomp.util.TypeConverter;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddColumnChange;
@@ -27,7 +30,7 @@ import liquibase.resource.ResourceAccessor;
  */
 public class LiquibaseFileModelReader {
 
-	private DBTypeConverter typesConverter;
+	private TypeConverter typeConverter;
 	private File baseDirectory;
 	private File rootFile;
 
@@ -39,11 +42,11 @@ public class LiquibaseFileModelReader {
 	 * @param rootFile      The root file of the Liquibase model.
 	 * @throws IllegalArgumentException Passing null value.
 	 */
-	public LiquibaseFileModelReader(DBTypeConverter typesConverter, File baseDirectory, File rootFile) {
+	public LiquibaseFileModelReader(TypeConverter typeConverter, File baseDirectory, File rootFile) {
 		super();
 		this.baseDirectory = baseDirectory;
 		this.rootFile = rootFile;
-		this.typesConverter = typesConverter;
+		this.typeConverter = typeConverter;
 	}
 
 	public DatamodelCMO readModel() throws Exception {
@@ -59,7 +62,7 @@ public class LiquibaseFileModelReader {
 	}
 
 	private DatamodelCMO createDatamodel(DatabaseChangeLog changeLog) {
-		DatamodelCMO datamodel = DatamodelCMO.of(new SchemeCMO[0]);
+		DatamodelCMO datamodel = DatamodelCMO.of();
 		for (ChangeSet changeSet : changeLog.getChangeSets()) {
 			for (Change change : changeSet.getChanges()) {
 				if (change instanceof AddColumnChange) {
@@ -78,56 +81,78 @@ public class LiquibaseFileModelReader {
 	}
 
 	private void processCreateTableChange(CreateTableChange change, DatamodelCMO datamodel) {
+		SchemaCMO schema = getSchema(datamodel, change.getSchemaName());
+		TableCMO table = getTable(schema, change.getTableName());
+		for (ColumnConfig columnConfig : change.getColumns()) {
+			table.addColumns(getColumn(table, columnConfig));
+		}
+	}
+
+	private SchemaCMO getSchema(DatamodelCMO datamodel, String schemaName) {
+		schemaName = isEmptyOrNull(schemaName) ? "" : schemaName;
+		if (datamodel.getSchemaByName(schemaName).isEmpty()) {
+			datamodel.addSchemata(SchemaCMO.of(schemaName));
+		}
+		return datamodel.getSchemaByName(schemaName).get();
+	}
+
+	private boolean isEmptyOrNull(String s) {
+		return (s == null) || s.isEmpty();
+	}
+
+	private TableCMO getTable(SchemaCMO schema, String tableName) {
+		if (schema.getTableByName(tableName).isEmpty()) {
+			schema.addTables(TableCMO.of(tableName));
+		}
+		return schema.getTableByName(tableName).get();
+	}
+
+	private ColumnCMO getColumn(TableCMO table, ColumnConfig columnConfig) {
+		return ColumnCMO.of( //
+				columnConfig.getName(), //
+				getType(columnConfig), //
+				columnConfig.isAutoIncrement()//
+		);
 	}
 
 	// TODO: Types should be managed by special classes (independent from the
 	// Types or other classes and frameworks).
-	private TypeInfo getDataType(ColumnConfig cc) {
-		LiquibaseDataType type = DataTypeFactory.getInstance().fromDescription(cc.getType(), null);
-		TypeInfo ti = new TypeInfo().setName(type.getName().toUpperCase());
-		if ("bigint".equalsIgnoreCase(type.getName())) {
-			ti.setName("BIGINT");
-			ti.setDataType(Types.BIGINT);
-		} else if ("blob".equalsIgnoreCase(type.getName())) {
-			ti.setName("BLOB");
-			ti.setDataType(Types.BLOB);
-		} else if ("bool".equalsIgnoreCase(type.getName()) || "boolean".equalsIgnoreCase(type.getName())) {
-			ti.setName("BOOLEAN");
-			ti.setDataType(Types.BOOLEAN);
-		} else if ("currency".equalsIgnoreCase(type.getName())) {
-			ti.setName("NUMERIC");
-			ti.setDataType(Types.NUMERIC);
-			ti.setDecimalDigits(2);
-			ti.setColumnSize(15);
-		} else if ("date".equalsIgnoreCase(type.getName())) {
-			ti.setName("DATE");
-			ti.setDataType(Types.DATE);
-		} else if ("datetime".equalsIgnoreCase(type.getName())) {
-			ti.setName("TIMESTAMP");
-			ti.setDataType(Types.TIMESTAMP);
-		} else if ("decimal".equalsIgnoreCase(type.getName())) {
-			ti.setName("DECIMAL");
-			ti.setDataType(Types.DECIMAL);
-			ti.setColumnSize(Integer.valueOf(type.getParameters()[0].toString()));
-			ti.setDecimalDigits(Integer.valueOf(type.getParameters()[1].toString()));
-		} else if ("int".equalsIgnoreCase(type.getName()) || "integer".equalsIgnoreCase(type.getName())) {
-			ti.setName("INTEGER");
-			ti.setDataType(Types.INTEGER);
-		} else if ("number".equalsIgnoreCase(type.getName()) || "numeric".equalsIgnoreCase(type.getName())) {
-			ti.setName("NUMERIC");
-			ti.setDataType(Types.NUMERIC);
-			ti.setColumnSize(Integer.valueOf(type.getParameters()[0].toString()));
-			ti.setDecimalDigits(Integer.valueOf(type.getParameters()[1].toString()));
-		} else if ("timestamp".equalsIgnoreCase(type.getName())) {
-			ti.setName("TIMESTAMP");
-			ti.setDataType(Types.TIMESTAMP);
-		} else if ("varchar".equalsIgnoreCase(type.getName())) {
-			ti.setDataType(Types.VARCHAR);
-			ti.setColumnSize(Integer.valueOf(type.getParameters()[0].toString()));
+	private TypeCMO getType(ColumnConfig cc) {
+		LiquibaseDataType lbdType = DataTypeFactory.getInstance().fromDescription(cc.getType(), null);
+		TypeCMO type = TypeCMO.of(Types.OTHER, null, null);
+		if ("bigint".equalsIgnoreCase(lbdType.getName())) {
+			type.setSqlType(Types.BIGINT);
+		} else if ("blob".equalsIgnoreCase(lbdType.getName())) {
+			type.setSqlType(Types.BLOB);
+		} else if ("bool".equalsIgnoreCase(lbdType.getName()) || "boolean".equalsIgnoreCase(lbdType.getName())) {
+			type.setSqlType(Types.BOOLEAN);
+		} else if ("currency".equalsIgnoreCase(lbdType.getName())) {
+			type.setDecimalPlace(2);
+			type.setLength(15);
+			type.setSqlType(Types.NUMERIC);
+		} else if ("date".equalsIgnoreCase(lbdType.getName())) {
+			type.setSqlType(Types.DATE);
+		} else if ("datetime".equalsIgnoreCase(lbdType.getName())) {
+			type.setSqlType(Types.TIMESTAMP);
+		} else if ("decimal".equalsIgnoreCase(lbdType.getName())) {
+			type.setDecimalPlace(Integer.valueOf(lbdType.getParameters()[1].toString()));
+			type.setLength(Integer.valueOf(lbdType.getParameters()[0].toString()));
+			type.setSqlType(Types.DECIMAL);
+		} else if ("int".equalsIgnoreCase(lbdType.getName()) || "integer".equalsIgnoreCase(lbdType.getName())) {
+			type.setSqlType(Types.INTEGER);
+		} else if ("number".equalsIgnoreCase(lbdType.getName()) || "numeric".equalsIgnoreCase(lbdType.getName())) {
+			type.setDecimalPlace(Integer.valueOf(lbdType.getParameters()[1].toString()));
+			type.setLength(Integer.valueOf(lbdType.getParameters()[0].toString()));
+			type.setSqlType(Types.NUMERIC);
+		} else if ("timestamp".equalsIgnoreCase(lbdType.getName())) {
+			type.setSqlType(Types.TIMESTAMP);
+		} else if ("varchar".equalsIgnoreCase(lbdType.getName())) {
+			type.setLength(Integer.valueOf(lbdType.getParameters()[0].toString()));
+			type.setSqlType(Types.VARCHAR);
 		} else {
-			System.out.println("ignored type: " + type.getName());
+			System.out.println("ignored type: " + lbdType.getName());
 		}
-		return ti;
+		return type;
 	}
 
 }

@@ -17,28 +17,28 @@ import lombok.experimental.Accessors;
 @Data
 public class DatamodelCMO {
 
-	private Map<String, SchemeCMO> schemes = new HashMap<>();
+	private Map<String, SchemaCMO> schemata = new HashMap<>();
 
 	private DatamodelCMO() {
 		super();
 	}
 
-	public static DatamodelCMO of(SchemeCMO... schemes) {
+	public static DatamodelCMO of(SchemaCMO... schemata) {
 		return new DatamodelCMO() //
-				.addSchemes(schemes) //
+				.addSchemata(schemata) //
 		;
 	}
 
-	public DatamodelCMO addSchemes(SchemeCMO... schemes) {
-		for (SchemeCMO scheme : schemes) {
-			this.schemes.put(scheme.getName(), scheme);
+	public DatamodelCMO addSchemata(SchemaCMO... schemes) {
+		for (SchemaCMO schema : schemes) {
+			this.schemata.put(schema.getName(), schema);
 		}
 		return this;
 	}
 
-	public Optional<SchemeCMO> getSchemeByName(String name) {
-		SchemeCMO scheme = this.schemes.get(name);
-		return scheme != null ? Optional.of(scheme) : Optional.empty();
+	public Optional<SchemaCMO> getSchemaByName(String name) {
+		SchemaCMO schema = this.schemata.get(name);
+		return schema != null ? Optional.of(schema) : Optional.empty();
 	}
 
 }
