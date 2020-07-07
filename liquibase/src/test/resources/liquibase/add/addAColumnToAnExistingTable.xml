@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+				http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+	<changeSet author="OlLie" id="change-001">
+		<createTable tableName="TABLE">
+			<column name="COLUMN" type="VARCHAR(42)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="OlLie" id="change-002">
+		<addColumn tableName="TABLE">
+			<column name="COLUMN_2" type="BOOLEAN" />
+			<column name="COLUMN_3" type="NUMERIC(10,2)" />
+		</addColumn>
+	</changeSet>
+</databaseChangeLog>

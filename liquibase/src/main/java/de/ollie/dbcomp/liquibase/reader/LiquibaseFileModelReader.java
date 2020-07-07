@@ -78,6 +78,11 @@ public class LiquibaseFileModelReader {
 	}
 
 	private void processAddColumnChange(AddColumnChange change, DatamodelCMO datamodel) {
+		SchemaCMO schema = getSchema(datamodel, change.getSchemaName());
+		TableCMO table = getTable(schema, change.getTableName());
+		for (ColumnConfig columnConfig : change.getColumns()) {
+			table.addColumns(getColumn(table, columnConfig));
+		}
 	}
 
 	private void processCreateTableChange(CreateTableChange change, DatamodelCMO datamodel) {

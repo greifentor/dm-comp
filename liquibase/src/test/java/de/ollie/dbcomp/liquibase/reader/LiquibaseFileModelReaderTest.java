@@ -21,7 +21,7 @@ import de.ollie.dbcomp.util.TypeConverter;
 @ExtendWith(MockitoExtension.class)
 public class LiquibaseFileModelReaderTest {
 
-	private static final String BASE_PATH = "src/test/resources/liquibase/create";
+	private static final String BASE_PATH = "src/test/resources/liquibase";
 
 	private LiquibaseFileModelReader unitUnderTest;
 
@@ -31,7 +31,7 @@ public class LiquibaseFileModelReaderTest {
 
 		@DisplayName("Should create a new table in the model (one field, no scheme).")
 		@Test
-		void passLiquibaseFilesForASingleCreation_OneFieldNoSchema_CreatesAModelWithPublicSchemeAndTheTable()
+		void passLiquibaseFilesForASingleTableCreation_OneFieldNoSchema_CreatesAModelWithPublicSchemeAndTheTable()
 				throws Exception {
 			// Prepare
 			DatamodelCMO expected = DatamodelCMO.of( //
@@ -49,8 +49,81 @@ public class LiquibaseFileModelReaderTest {
 											)//
 									}) //
 					});
-			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH),
-					new File("createSingleTableNoFieldNoScheme.xml"));
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/create"),
+					new File("createSingleTableNoFieldNoSchema.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Should create a new table in the model (one field, with scheme).")
+		@Test
+		void passLiquibaseFilesForASingleTableCreation_OneFieldWithSchema_CreatesAModelWithPassedSchemeAndTheTable()
+				throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"SCHEME", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE", //
+													ColumnCMO.of( //
+															"COLUMN", //
+															TypeCMO.of(Types.VARCHAR, 42, null), //
+															null //
+													) //
+											)//
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/create"),
+					new File("createSingleTableNoFieldWithSchema.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+	}
+
+	@DisplayName("Test for add column statements")
+	@Nested
+	class TestsForAddColumnStatements {
+
+		@DisplayName("Should add a field to a table.")
+		@Test
+		void passLiquibaseFilesForAColumnAddition_OneFieldNoSchema_CreatesAModelWithPublicSchemeAndTheTableWithTwoFields()
+				throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE") //
+													.addColumns( //
+															ColumnCMO.of( //
+																	"COLUMN", //
+																	TypeCMO.of(Types.VARCHAR, 42, null), //
+																	null //
+															), //
+															ColumnCMO.of( //
+																	"COLUMN_2", //
+																	TypeCMO.of(Types.BOOLEAN, null, null), //
+																	null //
+															), //
+															ColumnCMO.of( //
+																	"COLUMN_3", //
+																	TypeCMO.of(Types.NUMERIC, 10, 2), //
+																	null //
+															) //
+													) //
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
+					new File("addAColumnToAnExistingTable.xml"));
 			// Run
 			DatamodelCMO returned = unitUnderTest.readModel();
 			// Check
