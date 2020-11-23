@@ -23,19 +23,16 @@ public class DropColumnChangeModelChangeAction implements ModelChangeAction {
 		DropColumnChange dropColumnChange = (DropColumnChange) change;
 		SchemaCMO schema = LiquibaseFileModelReader.getSchema(dataModel, dropColumnChange.getSchemaName());
 		LiquibaseFileModelReader.getTable(schema, dropColumnChange.getTableName()) //
-				.ifPresentOrElse( //
-						table -> {
-							if (dropColumnChange.getColumnName() != null) {
-								table.removeColumn(dropColumnChange.getColumnName());
-								LOG.info("dropped column '{}' from table: {}", dropColumnChange.getColumnName(),
-										dropColumnChange.getTableName());
-							}
-							if (!dropColumnChange.getColumns().isEmpty()) {
-								LOG.warn("Multiple column dropping is not supported");
-							}
-						}, //
-						() -> LOG.warn("table not found: {}", dropColumnChange.getTableName()) //
-				) //
+				.ifPresent(table -> {
+					if (dropColumnChange.getColumnName() != null) {
+						table.removeColumn(dropColumnChange.getColumnName());
+						LOG.info("dropped column '{}' from table: {}", dropColumnChange.getColumnName(),
+								dropColumnChange.getTableName());
+					}
+					if (!dropColumnChange.getColumns().isEmpty()) {
+						LOG.warn("Multiple column dropping is not supported");
+					}
+				}) //
 		;
 	}
 

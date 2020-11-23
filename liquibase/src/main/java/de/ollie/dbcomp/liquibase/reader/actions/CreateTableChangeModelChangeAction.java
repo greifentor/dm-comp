@@ -24,14 +24,12 @@ public class CreateTableChangeModelChangeAction implements ModelChangeAction {
 		CreateTableChange createTableChange = (CreateTableChange) change;
 		SchemaCMO schema = LiquibaseFileModelReader.getSchema(dataModel, createTableChange.getSchemaName());
 		LiquibaseFileModelReader.createOrGetTable(schema, createTableChange.getTableName()) //
-				.ifPresentOrElse(table -> {
+				.ifPresent(table -> {
 					for (ColumnConfig columnConfig : createTableChange.getColumns()) {
 						table.addColumns(LiquibaseFileModelReader.getColumn(table, columnConfig));
 						LOG.info("added column '{}' to table: {}", columnConfig.getName(), table.getName());
 					}
-				}, //
-						() -> LOG.warn("table not found: {}", createTableChange.getTableName()) //
-				) //
+				}) //
 		;
 	}
 

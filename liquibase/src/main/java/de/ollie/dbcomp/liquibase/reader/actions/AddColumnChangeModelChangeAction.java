@@ -24,14 +24,12 @@ public class AddColumnChangeModelChangeAction implements ModelChangeAction {
 		AddColumnChange addColumnChange = (AddColumnChange) change;
 		SchemaCMO schema = LiquibaseFileModelReader.getSchema(dataModel, addColumnChange.getSchemaName());
 		LiquibaseFileModelReader.getTable(schema, addColumnChange.getTableName()) //
-				.ifPresentOrElse(table -> {
+				.ifPresent(table -> {
 					for (ColumnConfig columnConfig : addColumnChange.getColumns()) {
 						table.addColumns(LiquibaseFileModelReader.getColumn(table, columnConfig));
 						LOG.info("added column '{}' to table: {}", columnConfig.getName(), table.getName());
 					}
-				}, //
-						() -> LOG.warn("table not found: {}", addColumnChange.getTableName()) //
-				) //
+				}) //
 		;
 	}
 

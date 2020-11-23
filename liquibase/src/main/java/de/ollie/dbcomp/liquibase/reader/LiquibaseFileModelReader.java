@@ -117,7 +117,11 @@ public class LiquibaseFileModelReader {
 	}
 
 	public static Optional<TableCMO> getTable(SchemaCMO schema, String tableName) {
-		return schema.getTableByName(tableName);
+		Optional<TableCMO> result = schema.getTableByName(tableName);
+		if (result.isEmpty()) {
+			LOG.warn("table '{}' not found in schema: {}", tableName, schema != null ? schema.getName() : "n/a");
+		}
+		return result;
 	}
 
 	public static ColumnCMO getColumn(TableCMO table, ColumnConfig columnConfig) {
