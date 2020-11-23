@@ -4,9 +4,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
 				http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-	<changeSet author="OlLie" id="create-table-with-schema-change-001">
-		<createTable tableName="TABLE" schemaName="SCHEME">
+	<changeSet author="OlLie" id="drop-column-change-table-not-existing-001">
+		<createTable tableName="TABLE">
 			<column name="COLUMN" type="VARCHAR(42)" />
 		</createTable>
+	</changeSet>
+	<changeSet author="OlLie" id="drop-column-change-table-not-existing-002">
+		<dropColumn columnName="COLUMN"
+				tableName = "NOT_EXISTING" />
 	</changeSet>
 </databaseChangeLog>

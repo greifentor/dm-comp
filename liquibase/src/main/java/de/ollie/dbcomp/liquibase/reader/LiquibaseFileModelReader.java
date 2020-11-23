@@ -2,7 +2,17 @@ package de.ollie.dbcomp.liquibase.reader;
 
 import java.io.File;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.ollie.dbcomp.liquibase.reader.actions.AddColumnChangeModelChangeAction;
+import de.ollie.dbcomp.liquibase.reader.actions.CreateTableChangeModelChangeAction;
+import de.ollie.dbcomp.liquibase.reader.actions.DropColumnChangeModelChangeAction;
+import de.ollie.dbcomp.liquibase.reader.actions.ModelChangeAction;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DatamodelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
@@ -11,8 +21,6 @@ import de.ollie.dbcomp.model.TypeCMO;
 import de.ollie.dbcomp.util.TypeConverter;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
-import liquibase.change.core.AddColumnChange;
-import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -29,6 +37,8 @@ import liquibase.resource.ResourceAccessor;
  *
  */
 public class LiquibaseFileModelReader {
+
+	private static final Logger LOG = LogManager.getLogger(LiquibaseFileModelReader.class);
 
 	private TypeConverter typeConverter;
 	private File baseDirectory;
@@ -55,64 +65,62 @@ public class LiquibaseFileModelReader {
 	}
 
 	private DatabaseChangeLog getDatabaseChangeLog() throws Exception {
-		ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(this.baseDirectory.getAbsolutePath());
+		ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(baseDirectory.getAbsolutePath());
 		ChangeLogParameters changeLogParameters = new ChangeLogParameters();
-		return ChangeLogParserFactory.getInstance().getParser(this.rootFile.getName(), resourceAccessor)
-				.parse(this.rootFile.getName(), changeLogParameters, resourceAccessor);
+		return ChangeLogParserFactory.getInstance().getParser(rootFile.getName(), resourceAccessor)
+				.parse(rootFile.getName(), changeLogParameters, resourceAccessor);
 	}
 
 	private DatamodelCMO createDatamodel(DatabaseChangeLog changeLog) {
+		List<ModelChangeAction> actions = Arrays.asList( //
+				new AddColumnChangeModelChangeAction(), //
+				new CreateTableChangeModelChangeAction(), //
+				new DropColumnChangeModelChangeAction() //
+		);
 		DatamodelCMO datamodel = DatamodelCMO.of();
 		for (ChangeSet changeSet : changeLog.getChangeSets()) {
 			for (Change change : changeSet.getChanges()) {
-				if (change instanceof AddColumnChange) {
-					processAddColumnChange((AddColumnChange) change, datamodel);
-				} else if (change instanceof CreateTableChange) {
-					processCreateTableChange((CreateTableChange) change, datamodel);
-				} else {
-					System.out.println("ignored: " + change.getClass().getSimpleName() + " - " + change);
-				}
+				LOG.info("processing: {} ({})", change.getChangeSet().getId(), change.getClass());
+				actions //
+						.stream() //
+						.filter(action -> action.isMatchingForChange(change)) //
+						.findFirst() //
+						.ifPresentOrElse( //
+								action -> action.processOnDataModel(change, datamodel), //
+								() -> LOG.warn("ignored: {} - {}", change.getClass().getSimpleName(), change) //
+						) //
+				;
 			}
 		}
 		return datamodel;
 	}
 
-	private void processAddColumnChange(AddColumnChange change, DatamodelCMO datamodel) {
-		SchemaCMO schema = getSchema(datamodel, change.getSchemaName());
-		TableCMO table = getTable(schema, change.getTableName());
-		for (ColumnConfig columnConfig : change.getColumns()) {
-			table.addColumns(getColumn(table, columnConfig));
-		}
-	}
-
-	private void processCreateTableChange(CreateTableChange change, DatamodelCMO datamodel) {
-		SchemaCMO schema = getSchema(datamodel, change.getSchemaName());
-		TableCMO table = getTable(schema, change.getTableName());
-		for (ColumnConfig columnConfig : change.getColumns()) {
-			table.addColumns(getColumn(table, columnConfig));
-		}
-	}
-
-	private SchemaCMO getSchema(DatamodelCMO datamodel, String schemaName) {
+	public static SchemaCMO getSchema(DatamodelCMO datamodel, String schemaName) {
 		schemaName = isEmptyOrNull(schemaName) ? "" : schemaName;
 		if (datamodel.getSchemaByName(schemaName).isEmpty()) {
 			datamodel.addSchemata(SchemaCMO.of(schemaName));
+			LOG.info("added schema '{}' to data model.", schemaName);
 		}
 		return datamodel.getSchemaByName(schemaName).get();
 	}
 
-	private boolean isEmptyOrNull(String s) {
+	public static boolean isEmptyOrNull(String s) {
 		return (s == null) || s.isEmpty();
 	}
 
-	private TableCMO getTable(SchemaCMO schema, String tableName) {
+	public static Optional<TableCMO> createOrGetTable(SchemaCMO schema, String tableName) {
 		if (schema.getTableByName(tableName).isEmpty()) {
 			schema.addTables(TableCMO.of(tableName));
+			LOG.info("added table '{}' to schema: {}", tableName, schema);
 		}
-		return schema.getTableByName(tableName).get();
+		return schema.getTableByName(tableName);
 	}
 
-	private ColumnCMO getColumn(TableCMO table, ColumnConfig columnConfig) {
+	public static Optional<TableCMO> getTable(SchemaCMO schema, String tableName) {
+		return schema.getTableByName(tableName);
+	}
+
+	public static ColumnCMO getColumn(TableCMO table, ColumnConfig columnConfig) {
 		return ColumnCMO.of( //
 				columnConfig.getName(), //
 				getType(columnConfig), //
@@ -122,7 +130,7 @@ public class LiquibaseFileModelReader {
 
 	// TODO: Types should be managed by special classes (independent from the
 	// Types or other classes and frameworks).
-	private TypeCMO getType(ColumnConfig cc) {
+	public static TypeCMO getType(ColumnConfig cc) {
 		LiquibaseDataType lbdType = DataTypeFactory.getInstance().fromDescription(cc.getType(), null);
 		TypeCMO type = TypeCMO.of(Types.OTHER, null, null);
 		if ("bigint".equalsIgnoreCase(lbdType.getName())) {
@@ -155,7 +163,7 @@ public class LiquibaseFileModelReader {
 			type.setLength(Integer.valueOf(lbdType.getParameters()[0].toString()));
 			type.setSqlType(Types.VARCHAR);
 		} else {
-			System.out.println("ignored type: " + lbdType.getName());
+			LOG.warn("ignored type: {}", lbdType.getName());
 		}
 		return type;
 	}

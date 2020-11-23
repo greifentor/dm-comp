@@ -132,4 +132,91 @@ public class LiquibaseFileModelReaderTest {
 
 	}
 
+	@DisplayName("Test for drop column statements")
+	@Nested
+	class TestsForDropColumnStatements {
+
+		@DisplayName("Should create a new table in the model with two field and drop one of this field thereafter.")
+		@Test
+		void passLiquibaseFilesForASingleTableCreation_DropAField_CreatesAModelCorrectTableShape() throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE", //
+													ColumnCMO.of( //
+															"COLUMN", //
+															TypeCMO.of(Types.VARCHAR, 42, null), //
+															null //
+													) //
+											)//
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
+					new File("dropColumnFromTable.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Accepts a file with not existing column name.")
+		@Test
+		void doesNothingPassingAFileWithNotExitingColumnName() throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE", //
+													ColumnCMO.of( //
+															"COLUMN", //
+															TypeCMO.of(Types.VARCHAR, 42, null), //
+															null //
+													) //
+											)//
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
+					new File("dropColumnFromTable-NotExistingColumnName.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Accepts a file with not existing table name.")
+		@Test
+		void doesNothingPassingAFileWithNotExitingTableName() throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE", //
+													ColumnCMO.of( //
+															"COLUMN", //
+															TypeCMO.of(Types.VARCHAR, 42, null), //
+															null //
+													) //
+											)//
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
+					new File("dropColumnFromTable-NotExistingTableName.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+	}
+
 }

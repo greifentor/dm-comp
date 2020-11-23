@@ -45,4 +45,8 @@ public class TableCMO {
 		return column != null ? Optional.of(column) : Optional.empty();
 	}
 
+	public void removeColumn(String name) {
+		columns.remove(name);
+	}
+
 }
