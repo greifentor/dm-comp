@@ -49,4 +49,8 @@ public class SchemaCMO {
 		return table != null ? Optional.of(table) : Optional.empty();
 	}
 
+	public void removeTable(String name) {
+		tables.remove(name);
+	}
+
 }

@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import de.ollie.dbcomp.liquibase.reader.actions.AddColumnChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.CreateTableChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.DropColumnChangeModelChangeAction;
+import de.ollie.dbcomp.liquibase.reader.actions.DropTableChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.ModelChangeAction;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DatamodelCMO;
@@ -75,7 +76,8 @@ public class LiquibaseFileModelReader {
 		List<ModelChangeAction> actions = Arrays.asList( //
 				new AddColumnChangeModelChangeAction(), //
 				new CreateTableChangeModelChangeAction(), //
-				new DropColumnChangeModelChangeAction() //
+				new DropColumnChangeModelChangeAction(), //
+				new DropTableChangeModelChangeAction() //
 		);
 		DatamodelCMO datamodel = DatamodelCMO.of();
 		for (ChangeSet changeSet : changeLog.getChangeSets()) {
@@ -119,9 +121,15 @@ public class LiquibaseFileModelReader {
 	public static Optional<TableCMO> getTable(SchemaCMO schema, String tableName) {
 		Optional<TableCMO> result = schema.getTableByName(tableName);
 		if (result.isEmpty()) {
-			LOG.warn("table '{}' not found in schema: {}", tableName, schema != null ? schema.getName() : "n/a");
+			LOG.warn("table '{}' not found in schema: {}", tableName, getSchemaName(schema));
 		}
 		return result;
+	}
+
+	private static String getSchemaName(SchemaCMO schema) {
+		return (schema != null) && !schema.getName().equals("") //
+				? schema.getName() //
+				: "n/a";
 	}
 
 	public static ColumnCMO getColumn(TableCMO table, ColumnConfig columnConfig) {

@@ -219,4 +219,57 @@ public class LiquibaseFileModelReaderTest {
 
 	}
 
+	@DisplayName("Test for drop table statements")
+	@Nested
+	class TestsForDropTableStatements {
+
+		@DisplayName("Should create a new table in the model and drop it thereafter.")
+		@Test
+		void passLiquibaseFilesForASingleTableCreation_DropTheTable_CreatesAnEmptyModel() throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"" //
+							) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
+					new File("dropTable.xml"));
+
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Accepts a file with not existing table name.")
+		@Test
+		void doesNothingPassingAFileWithNotExitingTableName() throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE", //
+													ColumnCMO.of( //
+															"COLUMN", //
+															TypeCMO.of(Types.VARCHAR, 42, null), //
+															null //
+													) //
+											)//
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
+					new File("dropTable-NotExistingTableName.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+	}
+
 }
