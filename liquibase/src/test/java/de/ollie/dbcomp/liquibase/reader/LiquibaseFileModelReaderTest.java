@@ -1,6 +1,7 @@
 package de.ollie.dbcomp.liquibase.reader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.sql.Types;
@@ -13,9 +14,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DatamodelCMO;
+import de.ollie.dbcomp.model.ReaderResult;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
 import de.ollie.dbcomp.model.TypeCMO;
+import de.ollie.dbcomp.report.ImportReport;
+import de.ollie.dbcomp.report.ImportReportMessageLevel;
 import de.ollie.dbcomp.util.TypeConverter;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +28,20 @@ public class LiquibaseFileModelReaderTest {
 	private static final String BASE_PATH = "src/test/resources/liquibase";
 
 	private LiquibaseFileModelReader unitUnderTest;
+
+	private static void assertReportContains(ImportReportMessageLevel level, String message,
+			ImportReport importReport) {
+		importReport.getMessages() //
+				.stream() //
+				.filter(reportMessage -> (reportMessage.getLevel() == level) //
+						&& reportMessage.getMessage().equals(message)) //
+				.findAny() //
+				.ifPresentOrElse( //
+						reportMessage -> {
+						}, //
+						() -> fail(String.format("no match found for level '%s' and message: %s", level, message)) //
+				);
+	}
 
 	@DisplayName("Test for create table statements")
 	@Nested
@@ -132,9 +150,106 @@ public class LiquibaseFileModelReaderTest {
 
 	}
 
+	@DisplayName("Test for add auto increment statements")
+	@Nested
+	class TestsForAddAutoIncrementStatements {
+
+		@DisplayName("Should add a field to a table.")
+		@Test
+		void passLiquibaseFilesForAnAutoIncrementAddition_CreatesAModelWithPublicSchemeAndTheTableWithAutoIncrementFields()
+				throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE") //
+													.addColumns( //
+															ColumnCMO.of( //
+																	"COLUMN", //
+																	TypeCMO.of(Types.BIGINT, null, null), //
+																	true //
+															) //
+													) //
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
+					new File("addAutoIncrement.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Adds a specific entry to the report if table does not exists.")
+		@Test
+		void passLiquibaseFilesForAnAutoIncrementAddition_TableDoesNotExists_AddsASpecificEntryToTheReport()
+				throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE") //
+													.addColumns( //
+															ColumnCMO.of( //
+																	"COLUMN", //
+																	TypeCMO.of(Types.BIGINT, null, null), //
+																	null //
+															) //
+													) //
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
+					new File("addAutoIncrement-TableNotExisting.xml"));
+			// Run
+			ReaderResult returned = unitUnderTest.read();
+			// Check
+			assertEquals(expected, returned.getDatamodel());
+			assertReportContains(ImportReportMessageLevel.ERROR, "table 'TABLE_NOT_EXISTING' not found in schema: n/a",
+					returned.getImportReport());
+		}
+
+		@DisplayName("Adds a specific entry to the report if column does not exists.")
+		@Test
+		void passLiquibaseFilesForAnAutoIncrementAddition_ColumnDoesNotExists_AddsASpecificEntryToTheReport()
+				throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE") //
+													.addColumns( //
+															ColumnCMO.of( //
+																	"COLUMN", //
+																	TypeCMO.of(Types.BIGINT, null, null), //
+																	null //
+															) //
+													) //
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
+					new File("addAutoIncrement-ColumnNotExisting.xml"));
+			// Run
+			ReaderResult returned = unitUnderTest.read();
+			// Check
+			assertEquals(expected, returned.getDatamodel());
+			assertReportContains(ImportReportMessageLevel.ERROR,
+					"column 'COLUMN_NOT_EXISTING' not found in table: TABLE", returned.getImportReport());
+		}
+
+	}
+
 	@DisplayName("Test for add primary key statements")
 	@Nested
-	class TestsForPrimaryKeyStatements {
+	class TestsForAddPrimaryKeyStatements {
 
 		@DisplayName("Should add a primary key to a table.")
 		@Test

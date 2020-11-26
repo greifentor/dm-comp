@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.ollie.dbcomp.liquibase.reader.actions.AddAutoIncrementChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.AddColumnChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.AddPrimaryKeyChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.CreateTableChangeModelChangeAction;
@@ -84,6 +85,7 @@ public class LiquibaseFileModelReader {
 	private DatamodelCMO createDatamodel(DatabaseChangeLog changeLog, ImportReport importReport) {
 		List<ModelChangeAction> actions = Arrays.asList( //
 				new AddColumnChangeModelChangeAction(), //
+				new AddAutoIncrementChangeModelChangeAction(), //
 				new AddPrimaryKeyChangeModelChangeAction(), //
 				new CreateTableChangeModelChangeAction(), //
 				new DropColumnChangeModelChangeAction(), //
