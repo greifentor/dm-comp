@@ -132,6 +132,81 @@ public class LiquibaseFileModelReaderTest {
 
 	}
 
+	@DisplayName("Test for add primary key statements")
+	@Nested
+	class TestsForPrimaryKeyStatements {
+
+		@DisplayName("Should add a primary key to a table.")
+		@Test
+		void passLiquibaseFileForPrimaryKeyAddition_CreatesAModelWithTheTableAndItsPrimaryKey() throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE") //
+													.addColumns( //
+															ColumnCMO.of( //
+																	"COLUMN", //
+																	TypeCMO.of(Types.VARCHAR, 42, null), //
+																	null //
+															) //
+													) //
+													.addPrimaryKeys("COLUMN") //
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
+					new File("addAPrimaryKey.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Should add multiple primary keys to a table.")
+		@Test
+		void passLiquibaseFileForMultiplePrimaryKeyAddition_CreatesAModelWithTheTableAndAMultiplePrimaryKey()
+				throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE") //
+													.addColumns( //
+															ColumnCMO.of( //
+																	"COLUMN1", //
+																	TypeCMO.of(Types.INTEGER, null, null), //
+																	null //
+															), //
+															ColumnCMO.of( //
+																	"COLUMN2", //
+																	TypeCMO.of(Types.BIGINT, null, null), //
+																	null //
+															), //
+															ColumnCMO.of( //
+																	"COLUMN3", //
+																	TypeCMO.of(Types.VARCHAR, 42, null), //
+																	null //
+															) //
+													) //
+													.addPrimaryKeys("COLUMN1", "COLUMN2") //
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
+					new File("addMultiplePrimaryKey.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+	}
+
 	@DisplayName("Test for drop column statements")
 	@Nested
 	class TestsForDropColumnStatements {
@@ -211,6 +286,78 @@ public class LiquibaseFileModelReaderTest {
 					});
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropColumnFromTable-NotExistingTableName.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+	}
+
+	@DisplayName("Test for drop primary key statements")
+	@Nested
+	class TestsForDropPrimaryKeyStatements {
+
+		@DisplayName("Should drop a primary key from a table.")
+		@Test
+		void passLiquibaseFileForPrimaryKeyDropping_CreatesATableWithoutPrimaryKey() throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE", //
+													ColumnCMO.of( //
+															"COLUMN1", //
+															TypeCMO.of(Types.BIGINT, null, null), //
+															null //
+													), //
+													ColumnCMO.of( //
+															"COLUMN2", //
+															TypeCMO.of(Types.VARCHAR, 42, null), //
+															null //
+													) //
+											)//
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
+					new File("dropPrimaryKeyFromTable.xml"));
+			// Run
+			DatamodelCMO returned = unitUnderTest.readModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Accepts a file with not existing table name.")
+		@Test
+		void doesNothingPassingAFileWithNotExitingTableName() throws Exception {
+			// Prepare
+			DatamodelCMO expected = DatamodelCMO.of( //
+					new SchemaCMO[] { //
+							SchemaCMO.of( //
+									"", //
+									new TableCMO[] { //
+											TableCMO.of( //
+													"TABLE", //
+													ColumnCMO.of( //
+															"COLUMN1", //
+															TypeCMO.of(Types.BIGINT, null, null), //
+															null //
+													), //
+													ColumnCMO.of( //
+															"COLUMN2", //
+															TypeCMO.of(Types.VARCHAR, 42, null), //
+															null //
+													) //
+											).addPrimaryKeys( //
+													"COLUMN1" //
+											) //
+									}) //
+					});
+			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
+					new File("dropPrimaryKeyFromTable-NotExistingTableName.xml"));
 			// Run
 			DatamodelCMO returned = unitUnderTest.readModel();
 			// Check

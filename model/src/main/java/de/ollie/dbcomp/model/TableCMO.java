@@ -2,6 +2,7 @@ package de.ollie.dbcomp.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import lombok.Data;
@@ -36,6 +37,19 @@ public class TableCMO {
 	public TableCMO addColumns(ColumnCMO... columns) {
 		for (ColumnCMO column : columns) {
 			this.columns.put(column.getName(), column);
+		}
+		return this;
+	}
+
+	public TableCMO addPrimaryKeys(String... columnNames) {
+		for (String columnName : columnNames) {
+			getColumnByName(columnName.trim()) //
+					.ifPresentOrElse( //
+							column -> this.pkMembers.put(column.getName(), column), //
+							() -> {
+								throw new NoSuchElementException(
+										"column '" + columnName + "' does not exists in table: " + getName());
+							});
 		}
 		return this;
 	}

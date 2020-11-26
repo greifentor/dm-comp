@@ -10,8 +10,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.ollie.dbcomp.liquibase.reader.actions.AddColumnChangeModelChangeAction;
+import de.ollie.dbcomp.liquibase.reader.actions.AddPrimaryKeyChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.CreateTableChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.DropColumnChangeModelChangeAction;
+import de.ollie.dbcomp.liquibase.reader.actions.DropPrimaryKeyChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.DropTableChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.ModelChangeAction;
 import de.ollie.dbcomp.model.ColumnCMO;
@@ -75,8 +77,10 @@ public class LiquibaseFileModelReader {
 	private DatamodelCMO createDatamodel(DatabaseChangeLog changeLog) {
 		List<ModelChangeAction> actions = Arrays.asList( //
 				new AddColumnChangeModelChangeAction(), //
+				new AddPrimaryKeyChangeModelChangeAction(), //
 				new CreateTableChangeModelChangeAction(), //
 				new DropColumnChangeModelChangeAction(), //
+				new DropPrimaryKeyChangeModelChangeAction(), //
 				new DropTableChangeModelChangeAction() //
 		);
 		DatamodelCMO datamodel = DatamodelCMO.of();
