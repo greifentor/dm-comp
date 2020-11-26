@@ -6,6 +6,8 @@ import org.apache.logging.log4j.Logger;
 import de.ollie.dbcomp.liquibase.reader.LiquibaseFileModelReader;
 import de.ollie.dbcomp.model.DatamodelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
+import de.ollie.dbcomp.report.ImportReport;
+import de.ollie.dbcomp.report.ImportReportMessage;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
 
@@ -19,12 +21,20 @@ public class DropTableChangeModelChangeAction implements ModelChangeAction {
 	private static final Logger LOG = LogManager.getLogger(DropTableChangeModelChangeAction.class);
 
 	@Override
-	public void processOnDataModel(Change change, DatamodelCMO dataModel) {
+	public void processOnDataModel(Change change, DatamodelCMO dataModel, ImportReport importReport) {
 		DropTableChange dropTableChange = (DropTableChange) change;
 		SchemaCMO schema = LiquibaseFileModelReader.getSchema(dataModel, dropTableChange.getSchemaName());
-		LiquibaseFileModelReader.getTable(schema, dropTableChange.getTableName()) //
-				.ifPresent(table -> schema.removeTable(table.getName())) //
+		LiquibaseFileModelReader.getTable(schema, dropTableChange.getTableName(), importReport) //
+				.ifPresent(table -> {
+					schema.removeTable(table.getName());
+					importReport.addMessages( //
+							new ImportReportMessage() //
+									.setMessage(String.format("dropped table '%s' from schema: %s",
+											dropTableChange.getTableName(), schema.getName())) //
+					);
+				}) //
 		;
+
 	}
 
 	@Override

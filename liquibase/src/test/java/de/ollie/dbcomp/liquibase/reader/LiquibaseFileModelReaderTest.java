@@ -52,7 +52,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/create"),
 					new File("createSingleTableNoFieldNoSchema.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -80,7 +80,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/create"),
 					new File("createSingleTableNoFieldWithSchema.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -125,7 +125,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
 					new File("addAColumnToAnExistingTable.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -160,7 +160,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
 					new File("addAPrimaryKey.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -200,7 +200,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
 					new File("addMultiplePrimaryKey.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -233,7 +233,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropColumnFromTable.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -260,7 +260,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropColumnFromTable-NotExistingColumnName.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -287,7 +287,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropColumnFromTable-NotExistingTableName.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -325,7 +325,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropPrimaryKeyFromTable.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -359,7 +359,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropPrimaryKeyFromTable-NotExistingTableName.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -384,7 +384,7 @@ public class LiquibaseFileModelReaderTest {
 					new File("dropTable.xml"));
 
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 
 			// Check
 			assertEquals(expected, returned);
@@ -412,7 +412,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropTable-NotExistingTableName.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.readModel();
+			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
 			// Check
 			assertEquals(expected, returned);
 		}

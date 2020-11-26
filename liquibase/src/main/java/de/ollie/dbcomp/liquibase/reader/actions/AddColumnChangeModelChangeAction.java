@@ -6,6 +6,8 @@ import org.apache.logging.log4j.Logger;
 import de.ollie.dbcomp.liquibase.reader.LiquibaseFileModelReader;
 import de.ollie.dbcomp.model.DatamodelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
+import de.ollie.dbcomp.report.ImportReport;
+import de.ollie.dbcomp.report.ImportReportMessage;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddColumnChange;
@@ -20,14 +22,19 @@ public class AddColumnChangeModelChangeAction implements ModelChangeAction {
 	private static final Logger LOG = LogManager.getLogger(AddColumnChangeModelChangeAction.class);
 
 	@Override
-	public void processOnDataModel(Change change, DatamodelCMO dataModel) {
+	public void processOnDataModel(Change change, DatamodelCMO dataModel, ImportReport importReport) {
 		AddColumnChange addColumnChange = (AddColumnChange) change;
 		SchemaCMO schema = LiquibaseFileModelReader.getSchema(dataModel, addColumnChange.getSchemaName());
-		LiquibaseFileModelReader.getTable(schema, addColumnChange.getTableName()) //
+		LiquibaseFileModelReader.getTable(schema, addColumnChange.getTableName(), importReport) //
 				.ifPresent(table -> {
 					for (ColumnConfig columnConfig : addColumnChange.getColumns()) {
-						table.addColumns(LiquibaseFileModelReader.getColumn(table, columnConfig));
+						table.addColumns(LiquibaseFileModelReader.getColumn(table, columnConfig, importReport));
 						LOG.info("added column '{}' to table: {}", columnConfig.getName(), table.getName());
+						importReport.addMessages( //
+								new ImportReportMessage() //
+										.setMessage(String.format("added column '%s' to table: %s",
+												columnConfig.getName(), table.getName())) //
+						);
 					}
 				}) //
 		;

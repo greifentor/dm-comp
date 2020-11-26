@@ -18,9 +18,13 @@ import de.ollie.dbcomp.liquibase.reader.actions.DropTableChangeModelChangeAction
 import de.ollie.dbcomp.liquibase.reader.actions.ModelChangeAction;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DatamodelCMO;
+import de.ollie.dbcomp.model.ReaderResult;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
 import de.ollie.dbcomp.model.TypeCMO;
+import de.ollie.dbcomp.report.ImportReport;
+import de.ollie.dbcomp.report.ImportReportMessage;
+import de.ollie.dbcomp.report.ImportReportMessageLevel;
 import de.ollie.dbcomp.util.TypeConverter;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
@@ -62,19 +66,22 @@ public class LiquibaseFileModelReader {
 		this.typeConverter = typeConverter;
 	}
 
-	public DatamodelCMO readModel() throws Exception {
-		DatabaseChangeLog changeLog = getDatabaseChangeLog();
-		return createDatamodel(changeLog);
+	public ReaderResult read() throws Exception {
+		ImportReport importReport = new ImportReport();
+		DatabaseChangeLog changeLog = getDatabaseChangeLog(importReport);
+		return new ReaderResult() //
+				.setDatamodel(createDatamodel(changeLog, importReport)) //
+				.setImportReport(importReport);
 	}
 
-	private DatabaseChangeLog getDatabaseChangeLog() throws Exception {
+	private DatabaseChangeLog getDatabaseChangeLog(ImportReport importReport) throws Exception {
 		ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(baseDirectory.getAbsolutePath());
 		ChangeLogParameters changeLogParameters = new ChangeLogParameters();
 		return ChangeLogParserFactory.getInstance().getParser(rootFile.getName(), resourceAccessor)
 				.parse(rootFile.getName(), changeLogParameters, resourceAccessor);
 	}
 
-	private DatamodelCMO createDatamodel(DatabaseChangeLog changeLog) {
+	private DatamodelCMO createDatamodel(DatabaseChangeLog changeLog, ImportReport importReport) {
 		List<ModelChangeAction> actions = Arrays.asList( //
 				new AddColumnChangeModelChangeAction(), //
 				new AddPrimaryKeyChangeModelChangeAction(), //
@@ -92,13 +99,21 @@ public class LiquibaseFileModelReader {
 						.filter(action -> action.isMatchingForChange(change)) //
 						.findFirst() //
 						.ifPresentOrElse( //
-								action -> action.processOnDataModel(change, datamodel), //
-								() -> LOG.warn("ignored: {} - {}", change.getClass().getSimpleName(), change) //
+								action -> action.processOnDataModel(change, datamodel, importReport), //
+								() -> {
+									LOG.warn("ignored: {} - {}", change.getClass().getSimpleName(), change);
+									importReport.addMessages( //
+											new ImportReportMessage() //
+													.setLevel(ImportReportMessageLevel.WARN) //
+													.setMessage(String.format("ignored: %s - %s",
+															change.getClass().getSimpleName(), change)));
+								} //
 						) //
 				;
 			}
 		}
 		return datamodel;
+
 	}
 
 	public static SchemaCMO getSchema(DatamodelCMO datamodel, String schemaName) {
@@ -122,10 +137,16 @@ public class LiquibaseFileModelReader {
 		return schema.getTableByName(tableName);
 	}
 
-	public static Optional<TableCMO> getTable(SchemaCMO schema, String tableName) {
+	public static Optional<TableCMO> getTable(SchemaCMO schema, String tableName, ImportReport importReport) {
 		Optional<TableCMO> result = schema.getTableByName(tableName);
 		if (result.isEmpty()) {
 			LOG.warn("table '{}' not found in schema: {}", tableName, getSchemaName(schema));
+			importReport.addMessages( //
+					new ImportReportMessage() //
+							.setLevel(ImportReportMessageLevel.ERROR) //
+							.setMessage(String.format("table '%s' not found in schema: %s", tableName,
+									getSchemaName(schema))) //
+			);
 		}
 		return result;
 	}
@@ -136,17 +157,17 @@ public class LiquibaseFileModelReader {
 				: "n/a";
 	}
 
-	public static ColumnCMO getColumn(TableCMO table, ColumnConfig columnConfig) {
+	public static ColumnCMO getColumn(TableCMO table, ColumnConfig columnConfig, ImportReport importReport) {
 		return ColumnCMO.of( //
 				columnConfig.getName(), //
-				getType(columnConfig), //
+				getType(columnConfig, importReport), //
 				columnConfig.isAutoIncrement()//
 		);
 	}
 
 	// TODO: Types should be managed by special classes (independent from the
 	// Types or other classes and frameworks).
-	public static TypeCMO getType(ColumnConfig cc) {
+	public static TypeCMO getType(ColumnConfig cc, ImportReport importReport) {
 		LiquibaseDataType lbdType = DataTypeFactory.getInstance().fromDescription(cc.getType(), null);
 		TypeCMO type = TypeCMO.of(Types.OTHER, null, null);
 		if ("bigint".equalsIgnoreCase(lbdType.getName())) {
@@ -180,6 +201,11 @@ public class LiquibaseFileModelReader {
 			type.setSqlType(Types.VARCHAR);
 		} else {
 			LOG.warn("ignored type: {}", lbdType.getName());
+			importReport.addMessages( //
+					new ImportReportMessage() //
+							.setLevel(ImportReportMessageLevel.WARN) //
+							.setMessage(String.format("type ignored: %s", lbdType.getName())) //
+			);
 		}
 		return type;
 	}

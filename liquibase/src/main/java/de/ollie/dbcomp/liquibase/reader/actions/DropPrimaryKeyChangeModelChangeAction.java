@@ -8,6 +8,8 @@ import org.apache.logging.log4j.Logger;
 import de.ollie.dbcomp.liquibase.reader.LiquibaseFileModelReader;
 import de.ollie.dbcomp.model.DatamodelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
+import de.ollie.dbcomp.report.ImportReport;
+import de.ollie.dbcomp.report.ImportReportMessage;
 import liquibase.change.Change;
 import liquibase.change.core.DropPrimaryKeyChange;
 
@@ -21,11 +23,17 @@ public class DropPrimaryKeyChangeModelChangeAction implements ModelChangeAction 
 	private static final Logger LOG = LogManager.getLogger(DropPrimaryKeyChangeModelChangeAction.class);
 
 	@Override
-	public void processOnDataModel(Change change, DatamodelCMO dataModel) {
+	public void processOnDataModel(Change change, DatamodelCMO dataModel, ImportReport importReport) {
 		DropPrimaryKeyChange dropPrimaryKeyChange = (DropPrimaryKeyChange) change;
 		SchemaCMO schema = LiquibaseFileModelReader.getSchema(dataModel, dropPrimaryKeyChange.getSchemaName());
-		LiquibaseFileModelReader.getTable(schema, dropPrimaryKeyChange.getTableName()) //
-				.ifPresent(table -> table.setPkMembers(new HashMap<>())) //
+		LiquibaseFileModelReader.getTable(schema, dropPrimaryKeyChange.getTableName(), importReport) //
+				.ifPresent(table -> {
+					table.setPkMembers(new HashMap<>());
+					importReport.addMessages( //
+							new ImportReportMessage() //
+									.setMessage(String.format("dropped primary key from table: %s", table.getName())) //
+					);
+				}) //
 		;
 	}
 
