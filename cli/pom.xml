@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -10,13 +11,13 @@
 	</parent>
 
 	<artifactId>dm-comp-cli</artifactId>
-	<packaging>jar</packaging>
 
 	<name>DM-Comp (CLI)</name>
 	<description>A CLI for the comparator.</description>
 
 	<properties>
 		<java.version>11</java.version>
+		<jcommander.version>1.78</jcommander.version>
 	</properties>
 
 	<dependencies>
@@ -67,6 +68,11 @@
 			<version>1.3</version>
 		</dependency>
 		<dependency>
+			<groupId>com.beust</groupId>
+			<artifactId>jcommander</artifactId>
+			<version>${jcommander.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>de.ollie</groupId>
 			<artifactId>dm-comp-liquibase</artifactId>
 			<version>1.0.0</version>
@@ -92,11 +98,30 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2-beta-5</version>
 				<configuration>
-					<skipTests>false</skipTests>
+					<archive>
+						<manifest>
+							<mainClass>de.ollie.dbcomp.cli.CLI</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<finalName>${artifactId}-${project.version}-excutable</finalName>
+					<classifier>jar</classifier>
+					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id> <!-- this is used for inheritance merges -->
+						<phase>package</phase> <!-- bind to the packaging phase -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
