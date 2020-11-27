@@ -18,6 +18,6 @@ import lombok.experimental.Accessors;
 public class ReaderResult {
 
 	private ImportReport importReport;
-	private DatamodelCMO datamodel;
+	private DataModelCMO dataModel;
 
 }

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.ollie.dbcomp.model.ColumnCMO;
-import de.ollie.dbcomp.model.DatamodelCMO;
+import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.ReaderResult;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
@@ -52,7 +52,7 @@ public class LiquibaseFileModelReaderTest {
 		void passLiquibaseFilesForASingleTableCreation_OneFieldNoSchema_CreatesAModelWithPublicSchemeAndTheTable()
 				throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -70,7 +70,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/create"),
 					new File("createSingleTableNoFieldNoSchema.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -80,7 +80,7 @@ public class LiquibaseFileModelReaderTest {
 		void passLiquibaseFilesForASingleTableCreation_OneFieldWithSchema_CreatesAModelWithPassedSchemeAndTheTable()
 				throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"SCHEME", //
@@ -98,7 +98,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/create"),
 					new File("createSingleTableNoFieldWithSchema.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -114,7 +114,7 @@ public class LiquibaseFileModelReaderTest {
 		void passLiquibaseFilesForAColumnAddition_OneFieldNoSchema_CreatesAModelWithPublicSchemeAndTheTableWithTwoFields()
 				throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -143,7 +143,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
 					new File("addAColumnToAnExistingTable.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -159,7 +159,7 @@ public class LiquibaseFileModelReaderTest {
 		void passLiquibaseFilesForAnAutoIncrementAddition_CreatesAModelWithPublicSchemeAndTheTableWithAutoIncrementFields()
 				throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -178,7 +178,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
 					new File("addAutoIncrement.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -188,7 +188,7 @@ public class LiquibaseFileModelReaderTest {
 		void passLiquibaseFilesForAnAutoIncrementAddition_TableDoesNotExists_AddsASpecificEntryToTheReport()
 				throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -209,7 +209,7 @@ public class LiquibaseFileModelReaderTest {
 			// Run
 			ReaderResult returned = unitUnderTest.read();
 			// Check
-			assertEquals(expected, returned.getDatamodel());
+			assertEquals(expected, returned.getDataModel());
 			assertReportContains(ImportReportMessageLevel.ERROR, "table 'TABLE_NOT_EXISTING' not found in schema: n/a",
 					returned.getImportReport());
 		}
@@ -219,7 +219,7 @@ public class LiquibaseFileModelReaderTest {
 		void passLiquibaseFilesForAnAutoIncrementAddition_ColumnDoesNotExists_AddsASpecificEntryToTheReport()
 				throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -240,7 +240,7 @@ public class LiquibaseFileModelReaderTest {
 			// Run
 			ReaderResult returned = unitUnderTest.read();
 			// Check
-			assertEquals(expected, returned.getDatamodel());
+			assertEquals(expected, returned.getDataModel());
 			assertReportContains(ImportReportMessageLevel.ERROR,
 					"column 'COLUMN_NOT_EXISTING' not found in table: TABLE", returned.getImportReport());
 		}
@@ -255,7 +255,7 @@ public class LiquibaseFileModelReaderTest {
 		@Test
 		void passLiquibaseFileForPrimaryKeyAddition_CreatesAModelWithTheTableAndItsPrimaryKey() throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -275,7 +275,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
 					new File("addAPrimaryKey.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -285,7 +285,7 @@ public class LiquibaseFileModelReaderTest {
 		void passLiquibaseFileForMultiplePrimaryKeyAddition_CreatesAModelWithTheTableAndAMultiplePrimaryKey()
 				throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -315,7 +315,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/add"),
 					new File("addMultiplePrimaryKey.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -330,7 +330,7 @@ public class LiquibaseFileModelReaderTest {
 		@Test
 		void passLiquibaseFilesForASingleTableCreation_DropAField_CreatesAModelCorrectTableShape() throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -348,7 +348,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropColumnFromTable.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -357,7 +357,7 @@ public class LiquibaseFileModelReaderTest {
 		@Test
 		void doesNothingPassingAFileWithNotExitingColumnName() throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -375,7 +375,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropColumnFromTable-NotExistingColumnName.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -384,7 +384,7 @@ public class LiquibaseFileModelReaderTest {
 		@Test
 		void doesNothingPassingAFileWithNotExitingTableName() throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -402,7 +402,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropColumnFromTable-NotExistingTableName.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -417,7 +417,7 @@ public class LiquibaseFileModelReaderTest {
 		@Test
 		void passLiquibaseFileForPrimaryKeyDropping_CreatesATableWithoutPrimaryKey() throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -440,7 +440,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropPrimaryKeyFromTable.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -449,7 +449,7 @@ public class LiquibaseFileModelReaderTest {
 		@Test
 		void doesNothingPassingAFileWithNotExitingTableName() throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -474,7 +474,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropPrimaryKeyFromTable-NotExistingTableName.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -489,7 +489,7 @@ public class LiquibaseFileModelReaderTest {
 		@Test
 		void passLiquibaseFilesForASingleTableCreation_DropTheTable_CreatesAnEmptyModel() throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"" //
@@ -499,7 +499,7 @@ public class LiquibaseFileModelReaderTest {
 					new File("dropTable.xml"));
 
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 
 			// Check
 			assertEquals(expected, returned);
@@ -509,7 +509,7 @@ public class LiquibaseFileModelReaderTest {
 		@Test
 		void doesNothingPassingAFileWithNotExitingTableName() throws Exception {
 			// Prepare
-			DatamodelCMO expected = DatamodelCMO.of( //
+			DataModelCMO expected = DataModelCMO.of( //
 					new SchemaCMO[] { //
 							SchemaCMO.of( //
 									"", //
@@ -527,7 +527,7 @@ public class LiquibaseFileModelReaderTest {
 			unitUnderTest = new LiquibaseFileModelReader(new TypeConverter(), new File(BASE_PATH + "/drop"),
 					new File("dropTable-NotExistingTableName.xml"));
 			// Run
-			DatamodelCMO returned = unitUnderTest.read().getDatamodel();
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
 			// Check
 			assertEquals(expected, returned);
 		}

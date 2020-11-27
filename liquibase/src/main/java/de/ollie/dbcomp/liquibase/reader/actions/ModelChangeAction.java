@@ -1,6 +1,6 @@
 package de.ollie.dbcomp.liquibase.reader.actions;
 
-import de.ollie.dbcomp.model.DatamodelCMO;
+import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.report.ImportReport;
 import liquibase.change.Change;
 
@@ -18,7 +18,7 @@ public interface ModelChangeAction {
 	 * @param dataModel    The data model which the action is to process onto.
 	 * @param importReport A report object.
 	 */
-	void processOnDataModel(Change change, DatamodelCMO dataModel, ImportReport importReport);
+	void processOnDataModel(Change change, DataModelCMO dataModel, ImportReport importReport);
 
 	/**
 	 * Checks if the passed liquibase change is to process by the implementation of the interface.

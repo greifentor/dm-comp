@@ -18,7 +18,7 @@ import de.ollie.dbcomp.liquibase.reader.actions.DropPrimaryKeyChangeModelChangeA
 import de.ollie.dbcomp.liquibase.reader.actions.DropTableChangeModelChangeAction;
 import de.ollie.dbcomp.liquibase.reader.actions.ModelChangeAction;
 import de.ollie.dbcomp.model.ColumnCMO;
-import de.ollie.dbcomp.model.DatamodelCMO;
+import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.ReaderResult;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
@@ -71,7 +71,7 @@ public class LiquibaseFileModelReader {
 		ImportReport importReport = new ImportReport();
 		DatabaseChangeLog changeLog = getDatabaseChangeLog(importReport);
 		return new ReaderResult() //
-				.setDatamodel(createDatamodel(changeLog, importReport)) //
+				.setDataModel(createDataModel(changeLog, importReport)) //
 				.setImportReport(importReport);
 	}
 
@@ -82,7 +82,7 @@ public class LiquibaseFileModelReader {
 				.parse(rootFile.getName(), changeLogParameters, resourceAccessor);
 	}
 
-	private DatamodelCMO createDatamodel(DatabaseChangeLog changeLog, ImportReport importReport) {
+	private DataModelCMO createDataModel(DatabaseChangeLog changeLog, ImportReport importReport) {
 		List<ModelChangeAction> actions = Arrays.asList( //
 				new AddColumnChangeModelChangeAction(), //
 				new AddAutoIncrementChangeModelChangeAction(), //
@@ -92,7 +92,7 @@ public class LiquibaseFileModelReader {
 				new DropPrimaryKeyChangeModelChangeAction(), //
 				new DropTableChangeModelChangeAction() //
 		);
-		DatamodelCMO datamodel = DatamodelCMO.of();
+		DataModelCMO dataModel = DataModelCMO.of();
 		for (ChangeSet changeSet : changeLog.getChangeSets()) {
 			for (Change change : changeSet.getChanges()) {
 				LOG.info("processing: {} ({})", change.getChangeSet().getId(), change.getClass());
@@ -101,7 +101,7 @@ public class LiquibaseFileModelReader {
 						.filter(action -> action.isMatchingForChange(change)) //
 						.findFirst() //
 						.ifPresentOrElse( //
-								action -> action.processOnDataModel(change, datamodel, importReport), //
+								action -> action.processOnDataModel(change, dataModel, importReport), //
 								() -> {
 									LOG.warn("ignored: {} - {}", change.getClass().getSimpleName(), change);
 									importReport.addMessages( //
@@ -114,17 +114,17 @@ public class LiquibaseFileModelReader {
 				;
 			}
 		}
-		return datamodel;
+		return dataModel;
 
 	}
 
-	public static SchemaCMO getSchema(DatamodelCMO datamodel, String schemaName) {
+	public static SchemaCMO getSchema(DataModelCMO dataModel, String schemaName) {
 		schemaName = isEmptyOrNull(schemaName) ? "" : schemaName;
-		if (datamodel.getSchemaByName(schemaName).isEmpty()) {
-			datamodel.addSchemata(SchemaCMO.of(schemaName));
+		if (dataModel.getSchemaByName(schemaName).isEmpty()) {
+			dataModel.addSchemata(SchemaCMO.of(schemaName));
 			LOG.info("added schema '{}' to data model.", schemaName);
 		}
-		return datamodel.getSchemaByName(schemaName).get();
+		return dataModel.getSchemaByName(schemaName).get();
 	}
 
 	public static boolean isEmptyOrNull(String s) {

@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.ollie.dbcomp.liquibase.reader.LiquibaseFileModelReader;
-import de.ollie.dbcomp.model.DatamodelCMO;
+import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.report.ImportReport;
 import de.ollie.dbcomp.report.ImportReportMessage;
@@ -22,7 +22,7 @@ public class DropColumnChangeModelChangeAction implements ModelChangeAction {
 	private static final Logger LOG = LogManager.getLogger(DropColumnChangeModelChangeAction.class);
 
 	@Override
-	public void processOnDataModel(Change change, DatamodelCMO dataModel, ImportReport importReport) {
+	public void processOnDataModel(Change change, DataModelCMO dataModel, ImportReport importReport) {
 		DropColumnChange dropColumnChange = (DropColumnChange) change;
 		SchemaCMO schema = LiquibaseFileModelReader.getSchema(dataModel, dropColumnChange.getSchemaName());
 		LiquibaseFileModelReader.getTable(schema, dropColumnChange.getTableName(), importReport) //
