@@ -3,13 +3,12 @@ package de.ollie.dbcomp.cli;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.JCommander.Builder;
 
+import de.ollie.dbcomp.cli.commands.CompareCLICommand;
 import de.ollie.dbcomp.cli.commands.SayHelloCLICommand;
+import de.ollie.dbcomp.cli.commands.ShowCLICommand;
 
 /**
  * The CLI for the data model comparator.
@@ -18,8 +17,6 @@ import de.ollie.dbcomp.cli.commands.SayHelloCLICommand;
  *
  */
 public class CLI {
-
-	private static final Logger LOG = LogManager.getLogger(CLI.class);
 
 	private Map<String, CLICommand> commands = new HashMap<>();
 
@@ -36,7 +33,7 @@ public class CLI {
 		try {
 			jc.parse(args);
 		} catch (Exception e) {
-			LOG.error("error while parsing command line: " + e.getMessage());
+			System.out.println("ERROR while parsing command line: " + e.getMessage());
 			return 1;
 		}
 		if (commonOptions.isHelp()) {
@@ -48,12 +45,14 @@ public class CLI {
 	}
 
 	private void addCommands(Builder builder) {
-		addCommand(builder, "greet", new SayHelloCLICommand());
+		addCommand(builder, new CompareCLICommand());
+		addCommand(builder, new SayHelloCLICommand());
+		addCommand(builder, new ShowCLICommand());
 	}
 
-	private void addCommand(Builder builder, String commandStr, CLICommand command) {
-		builder.addCommand(commandStr, command);
-		commands.put(commandStr, command);
+	private void addCommand(Builder builder, CLICommand command) {
+		builder.addCommand(command.getCommandStr(), command);
+		commands.put(command.getCommandStr(), command);
 	}
 
 	private int runCommand(CLICommand selectedCommand, CommonOptions mainParameters) {
@@ -61,7 +60,6 @@ public class CLI {
 		if (selectedCommand != null) {
 			returnCode = selectedCommand.run(mainParameters);
 		}
-		LOG.info("program finished with code: " + returnCode);
 		return returnCode;
 	}
 

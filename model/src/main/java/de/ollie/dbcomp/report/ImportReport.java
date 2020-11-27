@@ -2,6 +2,7 @@ package de.ollie.dbcomp.report;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.Data;
 import lombok.Generated;
@@ -26,6 +27,14 @@ public class ImportReport {
 			this.messages.add(message);
 		}
 		return this;
+	}
+
+	public List<ImportReportMessage> getMessagesForLevel(ImportReportMessageLevel level) {
+		return messages //
+				.stream() //
+				.filter(message -> message.getLevel() == level) //
+				.collect(Collectors.toList()) //
+		;
 	}
 
 }
