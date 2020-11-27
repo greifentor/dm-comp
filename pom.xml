@@ -12,14 +12,13 @@
 
 	<groupId>de.ollie</groupId>
 	<artifactId>dm-comp</artifactId>
-	<version>${global.version}</version>
+	<version>1.0.0</version>
 	<packaging>pom</packaging>
 
 	<name>DM-Comp</name>
 	<description>A comparator for data models.</description>
 
 	<properties>
-		<global.version>1.0.0</global.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>

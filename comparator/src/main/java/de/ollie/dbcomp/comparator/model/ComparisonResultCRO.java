@@ -1,4 +1,4 @@
-package de.ollie.dbcomp.result;
+package de.ollie.dbcomp.comparator.model;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
