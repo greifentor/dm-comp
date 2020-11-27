@@ -1,5 +1,8 @@
 package de.ollie.dbcomp.comparator.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -11,5 +14,15 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Data
 public class ComparisonResultCRO {
+
+	private ComparisonReportCRO report;
+	private List<ChangeActionCRO> changeActions = new ArrayList<>();
+
+	public ComparisonResultCRO addChangeActions(ChangeActionCRO... changeActions) {
+		for (ChangeActionCRO changeAction : changeActions) {
+			this.changeActions.add(changeAction);
+		}
+		return this;
+	}
 
 }

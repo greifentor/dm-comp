@@ -1,12 +1,19 @@
 package de.ollie.dbcomp.comparator;
 
+import static de.ollie.dbcomp.util.Check.ensure;
+
+import java.util.Map.Entry;
+
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
+import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import de.ollie.dbcomp.model.DataModelCMO;
+import de.ollie.dbcomp.model.SchemaCMO;
+import de.ollie.dbcomp.model.TableCMO;
 
 /**
  * Compares two data models and returns a report about the comparison and a list of actions to equalize both models.
  *
- * @author Oliver.Lieshoff (27.11.2020)
+ * @author ollie (27.11.2020)
  *
  */
 public class DataModelComparator {
@@ -22,7 +29,29 @@ public class DataModelComparator {
 	 *         structure.
 	 */
 	public ComparisonResultCRO compare(DataModelCMO sourceModel, DataModelCMO targetModel) {
-		return null;
+		ensure(sourceModel != null, "source model cannot be null.");
+		ensure(targetModel != null, "target model cannot be null.");
+		ComparisonResultCRO result = new ComparisonResultCRO();
+		addDropTableChangeActions(sourceModel, targetModel, result);
+		return result;
+	}
+
+	private void addDropTableChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		for (Entry<String, SchemaCMO> schemaEntry : targetModel.getSchemata().entrySet()) {
+			sourceModel.getSchemaByName(schemaEntry.getKey()) //
+					.ifPresent(schema -> {
+						for (Entry<String, TableCMO> tableEntry : schemaEntry.getValue().getTables().entrySet()) {
+							if (schema.getTableByName(tableEntry.getKey()).isEmpty()) {
+								result.addChangeActions( //
+										new DropTableChangeActionCRO() //
+												.setSchemaName(schema.getName()) //
+												.setTableName(tableEntry.getKey()) //
+								);
+							}
+						}
+					});
+		}
 	}
 
 }
