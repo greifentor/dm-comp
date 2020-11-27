@@ -82,6 +82,7 @@
 		<module>model</module>
 		<module>comparator</module>
 		<module>liquibase</module>
+		<module>cli</module>
 	</modules>
 	<dependencies>
 		<dependency>
