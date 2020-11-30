@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
 @Data
 public class ComparisonResultCRO {
 
-	private ComparisonReportCRO report;
+	private ComparisonReportCRO report = new ComparisonReportCRO();
 	private List<ChangeActionCRO> changeActions = new ArrayList<>();
 
 	public ComparisonResultCRO addChangeActions(ChangeActionCRO... changeActions) {
