@@ -26,6 +26,7 @@
 
 	<modules>
 		<module>model</module>
+		<module>java-code-parser-antlr</module>
 		<module>comparator</module>
 		<module>liquibase</module>
 		<module>cli</module>
