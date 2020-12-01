@@ -79,6 +79,11 @@
 		</dependency>
 		<dependency>
 			<groupId>de.ollie</groupId>
+			<artifactId>dm-comp-javacode-jpa</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>de.ollie</groupId>
 			<artifactId>dm-comp-comparator</artifactId>
 			<version>1.0.0</version>
 		</dependency>

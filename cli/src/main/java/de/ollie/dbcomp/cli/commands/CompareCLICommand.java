@@ -17,6 +17,7 @@ import de.ollie.dbcomp.cli.CommonOptions;
 import de.ollie.dbcomp.cli.ModelFileType;
 import de.ollie.dbcomp.comparator.DataModelComparator;
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
+import de.ollie.dbcomp.javacodejpa.reader.JavaCodeFileModelReader;
 import de.ollie.dbcomp.liquibase.reader.LiquibaseFileModelReader;
 import de.ollie.dbcomp.liquibase.writer.ChangeActionToDatabaseChangeLogConverter;
 import de.ollie.dbcomp.model.ReaderResult;
@@ -63,6 +64,7 @@ public class CompareCLICommand implements CLICommand {
 		ReaderResult targetModelResult = null;
 		System.out.println("1");
 		try {
+			System.out.println(String.format("reading %s (%s)", sourceModelFileName, sourceModelFileType));
 			sourceModelResult = getDataModel(sourceModelFileName, sourceModelFileType);
 		} catch (Exception e) {
 			System.out
@@ -77,7 +79,9 @@ public class CompareCLICommand implements CLICommand {
 							.println(String.format("%5s - %s", message.getLevel(), message.getMessage())));
 			return 2;
 		}
+		verbose(sourceModelResult, commonOptions);
 		try {
+			System.out.println(String.format("reading %s (%s)", targetModelFileName, targetModelFileType));
 			targetModelResult = getDataModel(targetModelFileName, targetModelFileType);
 		} catch (Exception e) {
 			System.out
@@ -91,6 +95,7 @@ public class CompareCLICommand implements CLICommand {
 							.println(String.format("%5s - %s", message.getLevel(), message.getMessage())));
 			return 2;
 		}
+		verbose(targetModelResult, commonOptions);
 		ComparisonResultCRO comparisonResult = new DataModelComparator().compare(sourceModelResult.getDataModel(),
 				targetModelResult.getDataModel());
 		System.out.println("comparison complete");
@@ -111,9 +116,13 @@ public class CompareCLICommand implements CLICommand {
 	private ReaderResult getDataModel(String modelFileName, ModelFileType modelFileType) throws Exception {
 		String basePath = getBasePath(modelFileName);
 		String fileName = getFileName(modelFileName);
-		LiquibaseFileModelReader modelReader = new LiquibaseFileModelReader(new TypeConverter(), new File(basePath),
-				new File(fileName));
-		return modelReader.read();
+		ReaderResult result = null;
+		if (modelFileType == ModelFileType.JAVA) {
+			result = new JavaCodeFileModelReader().read(modelFileName);
+		} else {
+			result = new LiquibaseFileModelReader(new TypeConverter(), new File(basePath), new File(fileName)).read();
+		}
+		return result;
 	}
 
 	private String getBasePath(String modelFileName) {
@@ -149,6 +158,12 @@ public class CompareCLICommand implements CLICommand {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	private void verbose(ReaderResult readerResult, CommonOptions commonOptions) {
+		if (commonOptions.isVerbose()) {
+			System.out.println(readerResult.getDataModel());
 		}
 	}
 

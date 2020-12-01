@@ -33,7 +33,7 @@ public class JavaCodeFileModelReaderTest {
 					.setDataModel( //
 							DataModelCMO.of( //
 									SchemaCMO.of( //
-											"public", //
+											"", //
 											new TableCMO[] { TableCMO.of("AClass") } //
 									) //
 							) //
@@ -54,7 +54,7 @@ public class JavaCodeFileModelReaderTest {
 					.setDataModel( //
 							DataModelCMO.of( //
 									SchemaCMO.of( //
-											"public", //
+											"", //
 											new TableCMO[] { TableCMO.of("ATABLE") } //
 									) //
 							) //

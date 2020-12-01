@@ -21,7 +21,6 @@ import de.ollie.dbcomp.model.ReaderResult;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
 import de.ollie.dbcomp.report.ImportReport;
-import de.ollie.dbcomp.util.TypeConverter;
 
 /**
  * A Liquibase model reader, which is able to process Liquibase XML file from the file system.
@@ -33,10 +32,6 @@ public class JavaCodeFileModelReader {
 
 	private static final Logger LOG = LogManager.getLogger(JavaCodeFileModelReader.class);
 
-	private TypeConverter typeConverter;
-	private File baseDirectory;
-	private File rootFile;
-
 	private static String cutQuotes(String s) {
 		if (s.startsWith("\"")) {
 			s = s.substring(1);
@@ -45,21 +40,6 @@ public class JavaCodeFileModelReader {
 			s = s.substring(0, s.length() - 1);
 		}
 		return s;
-	}
-
-	/**
-	 * Creates a new model reader with the passed parameters.
-	 *
-	 * @param typeConverter A converter for the types.
-	 * @param baseDirectory The directory which contains the base XML file of the model.
-	 * @param rootFile      The root file of the Liquibase model.
-	 * @throws IllegalArgumentException Passing null value.
-	 */
-	public JavaCodeFileModelReader(TypeConverter typeConverter, File baseDirectory, File rootFile) {
-		super();
-		this.baseDirectory = baseDirectory;
-		this.rootFile = rootFile;
-		this.typeConverter = typeConverter;
 	}
 
 	public ReaderResult read(String pathName) throws Exception {
@@ -79,15 +59,17 @@ public class JavaCodeFileModelReader {
 			}
 			return l;
 		}
-		LOG.info("added file: {}", file.getCanonicalPath());
-		l.add(codeConverter.convert(Files.readString(Path.of(file.getCanonicalPath()))));
+		if (file.getCanonicalPath().endsWith(".java")) {
+			LOG.info("added file: {}", file.getCanonicalPath());
+			l.add(codeConverter.convert(Files.readString(Path.of(file.getCanonicalPath()))));
+		}
 		return l;
 	}
 
 	private DataModelCMO createDataModel(List<CompilationUnit> compilationUnits, ImportReport importReport) {
 		return DataModelCMO.of( //
 				SchemaCMO.of( //
-						"public", //
+						"", //
 						getTables(compilationUnits, importReport) //
 				) //
 		);

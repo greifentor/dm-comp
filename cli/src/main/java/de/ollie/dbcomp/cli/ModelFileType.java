@@ -8,6 +8,7 @@ package de.ollie.dbcomp.cli;
  */
 public enum ModelFileType {
 
-	LIQUIBASE;
+	LIQUIBASE, //
+	JAVA;
 
 }
