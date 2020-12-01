@@ -1,6 +1,9 @@
 package de.ollie.dbcomp.cli.commands;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -15,9 +18,12 @@ import de.ollie.dbcomp.cli.ModelFileType;
 import de.ollie.dbcomp.comparator.DataModelComparator;
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.liquibase.reader.LiquibaseFileModelReader;
+import de.ollie.dbcomp.liquibase.writer.ChangeActionToDatabaseChangeLogConverter;
 import de.ollie.dbcomp.model.ReaderResult;
 import de.ollie.dbcomp.report.ImportReportMessageLevel;
 import de.ollie.dbcomp.util.TypeConverter;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 
 /**
  * A command to compare to data models and get a report of the necessary changes.
@@ -87,7 +93,18 @@ public class CompareCLICommand implements CLICommand {
 		}
 		ComparisonResultCRO comparisonResult = new DataModelComparator().compare(sourceModelResult.getDataModel(),
 				targetModelResult.getDataModel());
-		System.out.println(comparisonResult);
+		System.out.println("comparison complete");
+		if (!comparisonResult.getChangeActions().isEmpty()) {
+			comparisonResult.getChangeActions() //
+					.forEach(System.out::println);
+		}
+		if (!comparisonResult.getReport().getMessages().isEmpty()) {
+			System.out.println("\nREPORT");
+			comparisonResult.getReport().getMessages() //
+					.forEach(System.out::println);
+		}
+		exportDatabaseChangeLog(
+				new ChangeActionToDatabaseChangeLogConverter().convert(comparisonResult.getChangeActions()));
 		return 0;
 	}
 
@@ -117,6 +134,22 @@ public class CompareCLICommand implements CLICommand {
 		modelFileName = StringUtils.reverse(modelFileName);
 		System.out.println("F:" + StringUtils.reverse(modelFileName.substring(0, modelFileName.indexOf('/'))));
 		return StringUtils.reverse(modelFileName.substring(0, modelFileName.indexOf('/')));
+	}
+
+	private void exportDatabaseChangeLog(DatabaseChangeLog databaseChangeLog) {
+		PrintStream printStreamFile = null;
+		try {
+			printStreamFile = new PrintStream("change-log.xml");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		XMLChangeLogSerializer changeLogSerializer = new XMLChangeLogSerializer();
+		try {
+			changeLogSerializer.write(databaseChangeLog.getChangeSets(), printStreamFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
