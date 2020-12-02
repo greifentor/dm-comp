@@ -5,6 +5,7 @@ import static de.ollie.dbcomp.util.Check.ensure;
 import java.util.Map.Entry;
 
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
+import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
@@ -32,8 +33,27 @@ public class DataModelComparator {
 		ensure(sourceModel != null, "source model cannot be null.");
 		ensure(targetModel != null, "target model cannot be null.");
 		ComparisonResultCRO result = new ComparisonResultCRO();
+		addCreateTableChangeActions(sourceModel, targetModel, result);
 		addDropTableChangeActions(sourceModel, targetModel, result);
 		return result;
+	}
+
+	private void addCreateTableChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		for (Entry<String, SchemaCMO> schemaEntry : sourceModel.getSchemata().entrySet()) {
+			targetModel.getSchemaByName(schemaEntry.getKey()) //
+					.ifPresent(schema -> {
+						for (Entry<String, TableCMO> tableEntry : schemaEntry.getValue().getTables().entrySet()) {
+							if (schema.getTableByName(tableEntry.getKey()).isEmpty()) {
+								result.addChangeActions( //
+										new CreateTableChangeActionCRO() //
+												.setSchemaName(schema.getName()) //
+												.setTableName(tableEntry.getKey()) //
+								);
+							}
+						}
+					});
+		}
 	}
 
 	private void addDropTableChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,

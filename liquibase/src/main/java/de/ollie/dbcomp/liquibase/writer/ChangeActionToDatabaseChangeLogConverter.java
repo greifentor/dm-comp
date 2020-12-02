@@ -1,11 +1,14 @@
 package de.ollie.dbcomp.liquibase.writer;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
-import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
+import de.ollie.dbcomp.liquibase.writer.processors.ChangeProcessor;
+import de.ollie.dbcomp.liquibase.writer.processors.CreateTableChangeProcessor;
+import de.ollie.dbcomp.liquibase.writer.processors.DropTableChangeProcessor;
 import liquibase.change.Change;
-import liquibase.change.core.DropTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 
@@ -15,6 +18,11 @@ import liquibase.changelog.DatabaseChangeLog;
  * @author ollie (30.11.2020)
  */
 public class ChangeActionToDatabaseChangeLogConverter {
+
+	private static final List<ChangeProcessor> CHANGE_PROCESSORS = Arrays.asList( //
+			new CreateTableChangeProcessor(), //
+			new DropTableChangeProcessor() //
+	);
 
 	public DatabaseChangeLog convert(List<ChangeActionCRO> changeActions) {
 		if (changeActions == null) {
@@ -26,21 +34,18 @@ public class ChangeActionToDatabaseChangeLogConverter {
 					result);
 			result.addChangeSet(changeSet);
 			changeActions //
-					.forEach(action -> changeSet.addChange(createChange(action)));
+					.forEach(action -> createChange(action).ifPresent(changeSet::addChange));
 		}
 		return result;
 	}
 
-	private Change createChange(ChangeActionCRO action) {
-		if (action instanceof DropTableChangeActionCRO) {
-
-			DropTableChangeActionCRO dropAction = (DropTableChangeActionCRO) action;
-			DropTableChange change = new DropTableChange();
-			change.setSchemaName(dropAction.getSchemaName());
-			change.setTableName(dropAction.getTableName());
-			return change;
-		}
-		return null;
+	private Optional<Change> createChange(ChangeActionCRO action) {
+		return CHANGE_PROCESSORS //
+				.stream() //
+				.filter(processor -> processor.isToProcess(action)) //
+				.findFirst() //
+				.map(processor -> processor.process(action)) //
+		;
 	}
 
 }
