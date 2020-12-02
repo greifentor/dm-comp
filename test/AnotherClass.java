@@ -1,6 +1,6 @@
 package bla;
 
 @Entity
-@Table("TABLE1")
+@Table("TABLE")
 public class AnotherClass {
 }

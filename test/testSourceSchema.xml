@@ -8,5 +8,8 @@
 		<createTable tableName="TABLE">
 			<column name="COLUMN" type="VARCHAR(42)" />
 		</createTable>
+		<createTable tableName="TABLE_TO_CREATE">
+			<column name="COLUMN" type="VARCHAR(42)" />
+		</createTable>
 	</changeSet>
 </databaseChangeLog>
