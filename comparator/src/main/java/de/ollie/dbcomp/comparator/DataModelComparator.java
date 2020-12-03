@@ -2,14 +2,18 @@ package de.ollie.dbcomp.comparator;
 
 import static de.ollie.dbcomp.util.Check.ensure;
 
+import java.sql.Types;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
+import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
+import de.ollie.dbcomp.model.TypeCMO;
 
 /**
  * Compares two data models and returns a report about the comparison and a list of actions to equalize both models.
@@ -47,6 +51,7 @@ public class DataModelComparator {
 							if (schema.getTableByName(tableEntry.getKey()).isEmpty()) {
 								result.addChangeActions( //
 										new CreateTableChangeActionCRO() //
+												.addColumns(getColumns(tableEntry.getValue())) //
 												.setSchemaName(schema.getName()) //
 												.setTableName(tableEntry.getKey()) //
 								);
@@ -54,6 +59,25 @@ public class DataModelComparator {
 						}
 					});
 		}
+	}
+
+	private ColumnDataCRO[] getColumns(TableCMO table) {
+		return table.getColumns().entrySet() //
+				.stream() //
+				.map(entry -> new ColumnDataCRO() //
+						.setName(entry.getValue().getName()) //
+						.setSqlType(getSQLType(entry.getValue().getType())) //
+				)//
+				.collect(Collectors.toList()) //
+				.toArray(new ColumnDataCRO[table.getColumns().size()]) //
+		;
+	}
+
+	private String getSQLType(TypeCMO type) {
+		if (type.getSqlType() == Types.LONGVARCHAR) {
+			return "LONGVARCHAR";
+		}
+		return "BIGINT";
 	}
 
 	private void addDropTableChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,

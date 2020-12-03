@@ -16,6 +16,8 @@ import de.ollie.blueprints.codereader.java.JavaCodeConverter;
 import de.ollie.blueprints.codereader.java.model.Annotation;
 import de.ollie.blueprints.codereader.java.model.ClassDeclaration;
 import de.ollie.blueprints.codereader.java.model.CompilationUnit;
+import de.ollie.dbcomp.javacodejpa.reader.converter.FieldDeclarationToColumnCMOConverter;
+import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.ReaderResult;
 import de.ollie.dbcomp.model.SchemaCMO;
@@ -32,6 +34,8 @@ public class JavaCodeFileModelReader {
 
 	private static final Logger LOG = LogManager.getLogger(JavaCodeFileModelReader.class);
 
+	private final FieldDeclarationToColumnCMOConverter fieldDeclarationToColumnCMOConverter;
+
 	private static String cutQuotes(String s) {
 		if (s.startsWith("\"")) {
 			s = s.substring(1);
@@ -40,6 +44,11 @@ public class JavaCodeFileModelReader {
 			s = s.substring(0, s.length() - 1);
 		}
 		return s;
+	}
+
+	public JavaCodeFileModelReader(FieldDeclarationToColumnCMOConverter fieldDeclarationToColumnCMOConverter) {
+		super();
+		this.fieldDeclarationToColumnCMOConverter = fieldDeclarationToColumnCMOConverter;
 	}
 
 	public ReaderResult read(String pathName) throws Exception {
@@ -82,7 +91,7 @@ public class JavaCodeFileModelReader {
 				.filter(typeDeclaration -> typeDeclaration instanceof ClassDeclaration) //
 				.map(typeDeclaration -> (ClassDeclaration) typeDeclaration) //
 				.filter(classDeclaration -> getAnnotationWithName("Entity", classDeclaration).isPresent()) //
-				.map(classDeclaration -> TableCMO.of(getTableName(classDeclaration))) //
+				.map(classDeclaration -> TableCMO.of(getTableName(classDeclaration), getColumns(classDeclaration))) //
 				.collect(Collectors.toList()) //
 				.toArray(new TableCMO[0]) //
 		;
@@ -100,6 +109,15 @@ public class JavaCodeFileModelReader {
 		return getAnnotationWithName("Table", classDeclaration) //
 				.map(annotation -> cutQuotes(annotation.getValue())) //
 				.orElse(classDeclaration.getName()) //
+		;
+	}
+
+	private ColumnCMO[] getColumns(ClassDeclaration classDeclaration) {
+		return classDeclaration.getFields() //
+				.stream() //
+				.map(fieldDeclarationToColumnCMOConverter::convert) //
+				.collect(Collectors.toList()) //
+				.toArray(new ColumnCMO[classDeclaration.getFields().size()]) //
 		;
 	}
 

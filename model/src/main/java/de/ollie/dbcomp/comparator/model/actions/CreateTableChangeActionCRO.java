@@ -1,5 +1,8 @@
 package de.ollie.dbcomp.comparator.model.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -14,7 +17,15 @@ import lombok.experimental.Accessors;
 @Data
 public class CreateTableChangeActionCRO implements ChangeActionCRO {
 
+	private List<ColumnDataCRO> columns = new ArrayList<>();
 	private String tableName;
 	private String schemaName;
+
+	public CreateTableChangeActionCRO addColumns(ColumnDataCRO... columns) {
+		for (ColumnDataCRO column : columns) {
+			this.columns.add(column);
+		}
+		return this;
+	}
 
 }

@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import de.ollie.dbcomp.javacodejpa.reader.converter.FieldDeclarationToColumnCMOConverter;
 import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.ReaderResult;
 import de.ollie.dbcomp.model.SchemaCMO;
@@ -17,6 +19,9 @@ import de.ollie.dbcomp.report.ImportReport;
 
 @ExtendWith(MockitoExtension.class)
 public class JavaCodeFileModelReaderTest {
+
+	@Spy
+	private FieldDeclarationToColumnCMOConverter fieldDeclarationToColumnCMOConverter = new FieldDeclarationToColumnCMOConverter();
 
 	@InjectMocks
 	private JavaCodeFileModelReader unitUnderTest;

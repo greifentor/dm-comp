@@ -18,6 +18,7 @@ import de.ollie.dbcomp.cli.ModelFileType;
 import de.ollie.dbcomp.comparator.DataModelComparator;
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.javacodejpa.reader.JavaCodeFileModelReader;
+import de.ollie.dbcomp.javacodejpa.reader.converter.FieldDeclarationToColumnCMOConverter;
 import de.ollie.dbcomp.liquibase.reader.LiquibaseFileModelReader;
 import de.ollie.dbcomp.liquibase.writer.ChangeActionToDatabaseChangeLogConverter;
 import de.ollie.dbcomp.model.ReaderResult;
@@ -62,18 +63,17 @@ public class CompareCLICommand implements CLICommand {
 	public int run(CommonOptions commonOptions) {
 		ReaderResult sourceModelResult = null;
 		ReaderResult targetModelResult = null;
-		System.out.println("1");
 		try {
-			System.out.println(String.format("reading %s (%s)", sourceModelFileName, sourceModelFileType));
+			System.out.print(String.format("reading %s (%s) ... ", sourceModelFileName, sourceModelFileType));
 			sourceModelResult = getDataModel(sourceModelFileName, sourceModelFileType);
+			System.out.println("done");
 		} catch (Exception e) {
-			System.out
-					.println("ERROR while reading source model from: " + sourceModelFileName + " -> " + e.getMessage());
+			System.out.println(
+					"\nERROR while reading source model from: " + sourceModelFileName + " -> " + e.getMessage());
 			return 1;
 		}
-		System.out.println("2");
 		if (!sourceModelResult.getImportReport().getMessagesForLevel(ImportReportMessageLevel.ERROR).isEmpty()) {
-			System.out.println("ERRORS found in source file:");
+			System.out.println("\nERRORS found in source file:");
 			sourceModelResult.getImportReport().getMessagesForLevel(ImportReportMessageLevel.ERROR) //
 					.forEach(message -> System.out
 							.println(String.format("%5s - %s", message.getLevel(), message.getMessage())));
@@ -81,8 +81,9 @@ public class CompareCLICommand implements CLICommand {
 		}
 		verbose(sourceModelResult, commonOptions);
 		try {
-			System.out.println(String.format("reading %s (%s)", targetModelFileName, targetModelFileType));
+			System.out.print(String.format("reading %s (%s) ... ", targetModelFileName, targetModelFileType));
 			targetModelResult = getDataModel(targetModelFileName, targetModelFileType);
+			System.out.println("done");
 		} catch (Exception e) {
 			System.out
 					.println("ERROR while reading target model from: " + targetModelFileName + " -> " + e.getMessage());
@@ -96,9 +97,10 @@ public class CompareCLICommand implements CLICommand {
 			return 2;
 		}
 		verbose(targetModelResult, commonOptions);
+		System.out.print("comparing models ... ");
 		ComparisonResultCRO comparisonResult = new DataModelComparator().compare(sourceModelResult.getDataModel(),
 				targetModelResult.getDataModel());
-		System.out.println("comparison complete");
+		System.out.println("done\n");
 		if (!comparisonResult.getChangeActions().isEmpty()) {
 			comparisonResult.getChangeActions() //
 					.forEach(System.out::println);
@@ -118,7 +120,7 @@ public class CompareCLICommand implements CLICommand {
 		String fileName = getFileName(modelFileName);
 		ReaderResult result = null;
 		if (modelFileType == ModelFileType.JAVA) {
-			result = new JavaCodeFileModelReader().read(modelFileName);
+			result = new JavaCodeFileModelReader(new FieldDeclarationToColumnCMOConverter()).read(modelFileName);
 		} else {
 			result = new LiquibaseFileModelReader(new TypeConverter(), new File(basePath), new File(fileName)).read();
 		}
@@ -131,7 +133,6 @@ public class CompareCLICommand implements CLICommand {
 			return ".";
 		}
 		modelFileName = StringUtils.reverse(modelFileName);
-		System.out.println("D:" + StringUtils.reverse(modelFileName.substring(modelFileName.indexOf('/'))));
 		return StringUtils.reverse(modelFileName.substring(modelFileName.indexOf('/')));
 	}
 
@@ -141,7 +142,6 @@ public class CompareCLICommand implements CLICommand {
 			return modelFileName;
 		}
 		modelFileName = StringUtils.reverse(modelFileName);
-		System.out.println("F:" + StringUtils.reverse(modelFileName.substring(0, modelFileName.indexOf('/'))));
 		return StringUtils.reverse(modelFileName.substring(0, modelFileName.indexOf('/')));
 	}
 
