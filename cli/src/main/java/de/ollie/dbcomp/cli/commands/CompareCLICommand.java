@@ -38,6 +38,8 @@ public class CompareCLICommand implements CLICommand {
 
 	private static final Logger LOG = LogManager.getLogger(CompareCLICommand.class);
 
+	private static final String EXPORT_FILE_NAME = "change-log.xml";
+
 	@Parameter(names = { "-s",
 			"--source" }, required = true, description = "The name of the file with the source model.")
 	private String sourceModelFileName;
@@ -100,18 +102,22 @@ public class CompareCLICommand implements CLICommand {
 		System.out.print("comparing models ... ");
 		ComparisonResultCRO comparisonResult = new DataModelComparator().compare(sourceModelResult.getDataModel(),
 				targetModelResult.getDataModel());
-		System.out.println("done\n");
-		if (!comparisonResult.getChangeActions().isEmpty()) {
-			comparisonResult.getChangeActions() //
-					.forEach(System.out::println);
+		System.out.println("done");
+		if (commonOptions.isVerbose()) {
+			if (!comparisonResult.getChangeActions().isEmpty()) {
+				comparisonResult.getChangeActions() //
+						.forEach(System.out::println);
+			}
+			if (!comparisonResult.getReport().getMessages().isEmpty()) {
+				System.out.println("\nREPORT");
+				comparisonResult.getReport().getMessages() //
+						.forEach(System.out::println);
+			}
 		}
-		if (!comparisonResult.getReport().getMessages().isEmpty()) {
-			System.out.println("\nREPORT");
-			comparisonResult.getReport().getMessages() //
-					.forEach(System.out::println);
-		}
+		System.out.print(String.format("exporting change log to %s ... ", EXPORT_FILE_NAME));
 		exportDatabaseChangeLog(
 				new ChangeActionToDatabaseChangeLogConverter().convert(comparisonResult.getChangeActions()));
+		System.out.println("done");
 		return 0;
 	}
 
@@ -148,7 +154,7 @@ public class CompareCLICommand implements CLICommand {
 	private void exportDatabaseChangeLog(DatabaseChangeLog databaseChangeLog) {
 		PrintStream printStreamFile = null;
 		try {
-			printStreamFile = new PrintStream("change-log.xml");
+			printStreamFile = new PrintStream(EXPORT_FILE_NAME);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
