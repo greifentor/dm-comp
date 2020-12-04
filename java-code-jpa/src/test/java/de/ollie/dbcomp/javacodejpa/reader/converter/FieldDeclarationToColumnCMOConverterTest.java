@@ -47,11 +47,26 @@ public class FieldDeclarationToColumnCMOConverterTest {
 		assertEquals(expected, returned);
 	}
 
+	@DisplayName("Returns a matching ColumnCMO for a passed field declaration (int).")
+	@Test
+	void passCorrectFieldDeclarationSimpleInt_ReturnsAMatchingColumnCMO() {
+		// Vorbereitung
+		ColumnCMO expected = ColumnCMO.of(NAME, TypeCMO.of(Types.INTEGER, null, null), false);
+		FieldDeclaration field = new FieldDeclaration() //
+				.setName(NAME) //
+				.setType("int") //
+		;
+		// Ausführung
+		ColumnCMO returned = unitUnderTest.convert(field);
+		// Prüfung
+		assertEquals(expected, returned);
+	}
+
 	@DisplayName("Returns a matching ColumnCMO for a passed field declaration (String).")
 	@Test
 	void passCorrectFieldDeclarationString_ReturnsAMatchingColumnCMO() {
 		// Vorbereitung
-		ColumnCMO expected = ColumnCMO.of(NAME, TypeCMO.of(Types.LONGVARCHAR, null, null), false);
+		ColumnCMO expected = ColumnCMO.of(NAME, TypeCMO.of(Types.VARCHAR, 255, null), false);
 		FieldDeclaration field = new FieldDeclaration() //
 				.setName(NAME) //
 				.setType("String") //

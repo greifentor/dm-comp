@@ -21,7 +21,9 @@ public class FieldDeclarationToColumnCMOConverter {
 
 	private TypeCMO getType(String typeName) {
 		if (typeName.equals("String")) {
-			return TypeCMO.of(Types.LONGVARCHAR, null, null);
+			return TypeCMO.of(Types.VARCHAR, 255, null);
+		} else if (typeName.equals("int")) {
+			return TypeCMO.of(Types.INTEGER, null, null);
 		}
 		return TypeCMO.of(Types.BIGINT, null, null);
 	}
