@@ -17,16 +17,33 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
+import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
+import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.DropTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 @ExtendWith(MockitoExtension.class)
 public class ChangeActionToDatabaseChangeLogConverterTest {
 
+	private static final String COLUMN_NAME = "column";
+	private static final String SQL_TYPE_NAME = "sql type";
 	private static final String TABLE_NAME = "table";
+
+	@Accessors(chain = true)
+	@AllArgsConstructor
+	@Data
+	static class ColumnData {
+		private String name;
+		private String sqlType;
+	}
 
 	@InjectMocks
 	private ChangeActionToDatabaseChangeLogConverter unitUnderTest;
@@ -63,6 +80,64 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			DatabaseChangeLog returned = unitUnderTest.convert(new ArrayList<>());
 			// Check
 			assertDatabaseChangeLogEquals(expected, returned, (c0, c1) -> 0);
+		}
+
+		@DisplayName("Returns a DatabaseChangeLog with one ChangeSet and some CreateTableChanges if the passed list has "
+				+ "CreateTableChangeActionCRO's only.")
+		@Test
+		void passAListWithCreateTableChangeActionCROsOnly_ReturnsADatabaseChangeLogWithOneChangeSetAndAllPassedCreateTableChanges() {
+			// Prepare
+			List<ChangeActionCRO> actions = Arrays.asList( //
+					new CreateTableChangeActionCRO().setTableName(TABLE_NAME + 1) //
+							.addColumns(new ColumnDataCRO().setName(COLUMN_NAME).setSqlType(SQL_TYPE_NAME)), //
+					new CreateTableChangeActionCRO().setTableName(TABLE_NAME + 2) //
+			);
+			DatabaseChangeLog expected = new DatabaseChangeLog("change-log.xml"); //
+			ChangeSet changeSet = new ChangeSet("ADD-CHANGE-SET-ID-HERE", "dm-comp", false, true, null, null, null,
+					expected);
+			changeSet.addChange(
+					createCreateTableChange(TABLE_NAME + 1, null, new ColumnData(COLUMN_NAME, SQL_TYPE_NAME)));
+			changeSet.addChange(createCreateTableChange(TABLE_NAME + 2, null));
+			expected.addChangeSet(changeSet);
+			// Run
+			DatabaseChangeLog returned = unitUnderTest.convert(actions);
+			// Check
+			assertDatabaseChangeLogEquals(expected, returned, (c0, c1) -> {
+				CreateTableChange ctc0 = (CreateTableChange) c0;
+				CreateTableChange ctc1 = (CreateTableChange) c1;
+				return Objects.compare(ctc0.getSchemaName(), ctc1.getSchemaName(), (o0, o1) -> o0.compareTo(o1))
+						+ Objects.compare(ctc0.getTableName(), ctc1.getTableName(), (o0, o1) -> o0.compareTo(o1))
+						+ compareColumnConfigs(ctc0.getColumns(), ctc1.getColumns());
+			});
+		}
+
+		private CreateTableChange createCreateTableChange(String tableName, String schemaName, ColumnData... columns) {
+			CreateTableChange change = new CreateTableChange();
+			change.setSchemaName(schemaName);
+			change.setTableName(tableName);
+			for (ColumnData column : columns) {
+				ColumnConfig columnConfig = new ColumnConfig();
+				columnConfig.setName(column.getName());
+				columnConfig.setType(column.getSqlType());
+				change.addColumn(columnConfig);
+			}
+			return change;
+		}
+
+		private int compareColumnConfigs(List<ColumnConfig> columns0, List<ColumnConfig> columns1) {
+			if (columns0.size() != columns1.size()) {
+				return 1;
+			}
+			for (int i = 0, leni = columns0.size(); i < leni; i++) {
+				ColumnConfig cc0 = columns0.get(i);
+				ColumnConfig cc1 = columns1.get(i);
+				if (!cc0.getName().equals(cc1.getName()) //
+						|| !cc0.getType().equals(cc1.getType()) //
+				) {
+					return 1;
+				}
+			}
+			return 0;
 		}
 
 		@DisplayName("Returns a DatabaseChangeLog with one ChangeSet and some DropTableChanges if the passed list has "
