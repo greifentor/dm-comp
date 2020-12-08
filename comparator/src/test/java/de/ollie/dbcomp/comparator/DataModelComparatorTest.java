@@ -3,6 +3,8 @@ package de.ollie.dbcomp.comparator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.sql.Types;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,10 +13,13 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
+import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
+import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
+import de.ollie.dbcomp.model.TypeCMO;
 
 @ExtendWith(MockitoExtension.class)
 public class DataModelComparatorTest {
@@ -70,6 +75,41 @@ public class DataModelComparatorTest {
 					) //
 			;
 			DataModelCMO sourceModel = DataModelCMO.of(SchemaCMO.of("public"));
+			DataModelCMO targetModel = DataModelCMO.of( //
+					SchemaCMO.of( //
+							"public", //
+							TableCMO.of("TABLE") //
+					) //
+			);
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a result with a add column action if a source model table has more columns than the "
+				+ "target model table.")
+		@Test
+		void passSourceModelWithATableWithMoreColumnsThanTheTargetModelTable_ReturnsAResultWithaAddColumnAction() {
+			// Prepare
+			ComparisonResultCRO expected = new ComparisonResultCRO() //
+					.addChangeActions( //
+							new AddColumnChangeActionCRO() //
+									.setSchemaName("public") //
+									.setTableName("TABLE") //
+									.setColumnName("COLUMN_NAME") //
+									.setSqlType("BIGINT") //
+					) //
+			;
+			DataModelCMO sourceModel = DataModelCMO.of( //
+					SchemaCMO.of( //
+							"public", //
+							TableCMO.of( //
+									"TABLE", //
+									ColumnCMO.of("COLUMN_NAME", TypeCMO.of(Types.BIGINT, null, null), false) //
+							) //
+					) //
+			);
 			DataModelCMO targetModel = DataModelCMO.of( //
 					SchemaCMO.of( //
 							"public", //

@@ -4,12 +4,15 @@ import static de.ollie.dbcomp.util.Check.ensure;
 
 import java.sql.Types;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
+import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
+import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
@@ -39,6 +42,7 @@ public class DataModelComparator {
 		ComparisonResultCRO result = new ComparisonResultCRO();
 		addCreateTableChangeActions(sourceModel, targetModel, result);
 		addDropTableChangeActions(sourceModel, targetModel, result);
+		addAddColumnChangeActions(sourceModel, targetModel, result);
 		return result;
 	}
 
@@ -96,6 +100,43 @@ public class DataModelComparator {
 						}
 					});
 		}
+	}
+
+	private void addAddColumnChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		sourceModel.getSchemata().entrySet() //
+				.stream() //
+				.map(Entry::getValue) //
+				.forEach(schema -> schema.getTables().entrySet() //
+						.stream() //
+						.map(Entry::getValue) //
+						.forEach(table -> table.getColumns().entrySet() //
+								.stream() //
+								.map(Entry::getValue) //
+								.forEach(column -> {
+									if (getColumn(targetModel, schema.getName(), table.getName(), column.getName())
+											.isEmpty()) { //
+										result.addChangeActions(new AddColumnChangeActionCRO() //
+												.setColumnName(column.getName()) //
+												.setSchemaName(schema.getName()) //
+												.setSqlType("BIGINT") //
+												.setTableName(table.getName()) //
+										);
+									}
+								}) //
+						) //
+				) //
+		;
+
+	}
+
+	private Optional<ColumnCMO> getColumn(DataModelCMO model, String schemaName, String tableName, String columnName) {
+		return model.getSchemaByName(schemaName) //
+				.orElse(SchemaCMO.of("n/a")) //
+				.getTableByName(tableName) //
+				.orElse(TableCMO.of("n/a")) //
+				.getColumnByName(columnName) //
+		;
 	}
 
 }
