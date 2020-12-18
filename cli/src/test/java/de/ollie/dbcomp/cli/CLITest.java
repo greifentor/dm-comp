@@ -43,6 +43,7 @@ public class CLITest {
 					+ "        <dropColumn schemaName=\"\" tableName=\"TABLE_DIFF_COLUMNS\">\n" //
 					+ "            <column name=\"IDENT\"/>\n" //
 					+ "        </dropColumn>\n" //
+					+ "        <modifyDataType columnName=\"NAME\" newDataType=\"VARCHAR(255)\" schemaName=\"\" tableName=\"TABLE_DIFF_COLUMNS\"/>\n" //
 					+ "    </changeSet>\n" //
 					+ "</databaseChangeLog>\n";
 			String outputFileName = out.toString() + "/out.xml";

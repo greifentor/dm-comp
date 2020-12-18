@@ -15,6 +15,7 @@
 	<changeSet author="OlLie" id="create-table-no-schema-change-001">
 		<createTable tableName="TABLE_DIFF_COLUMNS">
 			<column name="IDENT" type="BIGINT" />
+			<column name="NAME" type="BIGINT" />
 		</createTable>
 	</changeSet>
 </databaseChangeLog>

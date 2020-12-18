@@ -18,6 +18,7 @@ import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.ModifyDataTypeCRO;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
@@ -211,6 +212,44 @@ public class DataModelComparatorTest {
 					SchemaCMO.of( //
 							"public", //
 							TableCMO.of("TABLE") //
+					) //
+			);
+			DataModelCMO targetModel = DataModelCMO.of( //
+					SchemaCMO.of( //
+							"public", //
+							TableCMO.of( //
+									"TABLE", //
+									ColumnCMO.of("COLUMN_NAME", TypeCMO.of(Types.BIGINT, null, null), false) //
+							) //
+					) //
+			);
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a result with a modify data type action if a source model table has a column with a "
+				+ "different than the same column in the target model table.")
+		@Test
+		void passSourceModelTableAndTargetModelTableHaveAColumnWithSameNameAndDifferentType_ReturnsAResultWithAModifyDataTypeAction() {
+			// Prepare
+			ComparisonResultCRO expected = new ComparisonResultCRO() //
+					.addChangeActions( //
+							new ModifyDataTypeCRO() //
+									.setSchemaName("public") //
+									.setTableName("TABLE") //
+									.setColumnName("COLUMN_NAME") //
+									.setNewDataType("VARCHAR(20)") //
+					) //
+			;
+			DataModelCMO sourceModel = DataModelCMO.of( //
+					SchemaCMO.of( //
+							"public", //
+							TableCMO.of( //
+									"TABLE", //
+									ColumnCMO.of("COLUMN_NAME", TypeCMO.of(Types.VARCHAR, 20, null), false) //
+							) //
 					) //
 			);
 			DataModelCMO targetModel = DataModelCMO.of( //

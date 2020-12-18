@@ -13,6 +13,7 @@ import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.ModifyDataTypeCRO;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
@@ -45,6 +46,7 @@ public class DataModelComparator {
 		addDropTableChangeActions(sourceModel, targetModel, result);
 		addAddColumnChangeActions(sourceModel, targetModel, result);
 		addDropColumnChangeActions(sourceModel, targetModel, result);
+		addModifyDataTypeChangeActions(sourceModel, targetModel, result);
 		return result;
 	}
 
@@ -82,6 +84,8 @@ public class DataModelComparator {
 	private String getSQLType(TypeCMO type) {
 		if (type.getSqlType() == Types.LONGVARCHAR) {
 			return "LONGVARCHAR";
+		} else if (type.getSqlType() == Types.VARCHAR) {
+			return "VARCHAR(" + type.getLength() + ")";
 		}
 		return "BIGINT";
 	}
@@ -176,6 +180,38 @@ public class DataModelComparator {
 						) //
 				) //
 		;
+	}
+
+	private void addModifyDataTypeChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		sourceModel.getSchemata().entrySet() //
+				.stream() //
+				.map(Entry::getValue) //
+				.forEach(schema -> schema.getTables().entrySet() //
+						.stream() //
+						.map(Entry::getValue) //
+						.filter(table -> hasTable(targetModel, schema.getName(), table.getName())) //
+						.forEach(table -> table.getColumns().entrySet() //
+								.stream() //
+								.map(Entry::getValue) //
+								.forEach(column -> //
+								checkForColumn(targetModel, schema.getName(), table.getName(), column.getName(),
+										column.getType(), result)) //
+						) //
+				) //
+		;
+	}
+
+	private void checkForColumn(DataModelCMO model, String schemaName, String tableName, String columnName,
+			TypeCMO type, ComparisonResultCRO result) {
+		getColumn(model, schemaName, tableName, columnName) //
+				.ifPresent(column -> result.addChangeActions( //
+						new ModifyDataTypeCRO() //
+								.setColumnName(columnName) //
+								.setNewDataType(getSQLType(type)) //
+								.setSchemaName(schemaName) //
+								.setTableName(tableName) //
+				));
 	}
 
 }

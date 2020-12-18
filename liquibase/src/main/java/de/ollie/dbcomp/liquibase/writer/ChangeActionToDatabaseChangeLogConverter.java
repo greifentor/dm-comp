@@ -10,6 +10,7 @@ import de.ollie.dbcomp.liquibase.writer.processors.ChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.CreateTableChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.DropColumnChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.DropTableChangeProcessor;
+import de.ollie.dbcomp.liquibase.writer.processors.ModifyDataTypeChangeProcessor;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -25,7 +26,8 @@ public class ChangeActionToDatabaseChangeLogConverter {
 			new AddColumnChangeProcessor(), //
 			new CreateTableChangeProcessor(), //
 			new DropColumnChangeProcessor(), //
-			new DropTableChangeProcessor() //
+			new DropTableChangeProcessor(), //
+			new ModifyDataTypeChangeProcessor() //
 	);
 
 	public DatabaseChangeLog convert(List<ChangeActionCRO> changeActions) {

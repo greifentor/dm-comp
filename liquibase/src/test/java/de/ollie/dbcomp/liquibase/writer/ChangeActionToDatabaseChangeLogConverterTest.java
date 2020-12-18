@@ -23,6 +23,7 @@ import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.ModifyDataTypeCRO;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import lombok.AllArgsConstructor;
@@ -72,9 +73,11 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 		@Test
 		void passAnEmptyList_ReturnsAEmptyDatabaseChangeLog() throws Exception {
 			// Prepare
-			String expected = databaseChangeLogToString(new DatabaseChangeLog("change-log.xml")).replace("\r", "");
+			String expected = databaseChangeLogToString(new DatabaseChangeLog("change-log.xml")).replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Run
-			String returned = databaseChangeLogToString(unitUnderTest.convert(new ArrayList<>())).replace("\r", "");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(new ArrayList<>())).replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -99,7 +102,8 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 					new CreateTableChangeActionCRO().setTableName(TABLE_NAME + 2) //
 			);
 			// Run
-			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r", "");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -121,7 +125,8 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 					new DropTableChangeActionCRO().setTableName(TABLE_NAME + 2) //
 			);
 			// Run
-			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r", "");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -150,7 +155,8 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 							.setSqlType("BIGINT") //
 			);
 			// Run
-			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r", "");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -178,7 +184,31 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 							.setColumnName(COLUMN_NAME + 1) //
 			);
 			// Run
-			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r", "");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n")
+					.replace("\r", "\n");
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a DatabaseChangeLog with a ModifyDataTypeChange.")
+		@Test
+		void passAListWithAModifyDataChangeChange_ReturnsADatabaseChangeLogsWithTheCorrectChanges() throws Exception {
+			// Prepare
+			String expected = XML_HEADER //
+					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" objectQuotingStrategy=\"LEGACY\" runOnChange=\"true\">\n" //
+					+ "        <modifyDataType columnName=\"ID\" newDataType=\"BIGINT\" schemaName=\"public\" tableName=\"table\"/>\n" //
+					+ "    </changeSet>\n" //
+					+ "</databaseChangeLog>\n";
+			List<ChangeActionCRO> actions = Arrays.asList( //
+					new ModifyDataTypeCRO() //
+							.setTableName(TABLE_NAME) //
+							.setSchemaName("public") //
+							.setColumnName("ID") //
+							.setNewDataType("BIGINT") //
+			);
+			// Run
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
