@@ -72,6 +72,7 @@ public class CompareCLICommand implements CLICommand {
 		} catch (Exception e) {
 			System.out.println(
 					"\nERROR while reading source model from: " + sourceModelFileName + " -> " + e.getMessage());
+			verbose(e, commonOptions);
 			return 1;
 		}
 		if (!sourceModelResult.getImportReport().getMessagesForLevel(ImportReportMessageLevel.ERROR).isEmpty()) {
@@ -89,6 +90,7 @@ public class CompareCLICommand implements CLICommand {
 		} catch (Exception e) {
 			System.out
 					.println("ERROR while reading target model from: " + targetModelFileName + " -> " + e.getMessage());
+			verbose(e, commonOptions);
 			return 1;
 		}
 		if (!targetModelResult.getImportReport().getMessagesForLevel(ImportReportMessageLevel.ERROR).isEmpty()) {
@@ -170,6 +172,12 @@ public class CompareCLICommand implements CLICommand {
 	private void verbose(ReaderResult readerResult, CommonOptions commonOptions) {
 		if (commonOptions.isVerbose()) {
 			System.out.println(readerResult.getDataModel());
+		}
+	}
+
+	private void verbose(Exception e, CommonOptions commonOptions) {
+		if (commonOptions.isVerbose()) {
+			e.printStackTrace();
 		}
 	}
 

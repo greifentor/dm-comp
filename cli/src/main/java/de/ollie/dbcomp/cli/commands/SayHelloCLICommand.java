@@ -27,6 +27,8 @@ public class SayHelloCLICommand implements CLICommand {
 	public int run(CommonOptions commonOptions) {
 		if (commonOptions.isVerbose()) {
 			System.out.println(String.format("Hello%s!", (name != null ? ", " + name : "")));
+		} else {
+			System.out.println("Set '-v' to have an output!");
 		}
 		return 42;
 	}

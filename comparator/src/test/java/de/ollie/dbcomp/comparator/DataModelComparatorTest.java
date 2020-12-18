@@ -14,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
+import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
@@ -62,10 +64,79 @@ public class DataModelComparatorTest {
 			assertEquals("target model cannot be null.", thrown.getMessage());
 		}
 
-		@DisplayName("Returns a result with a remove table action if the source model has a table less than the target "
+		@DisplayName("Returns a result with a create table action if the source model has a table more than the target "
 				+ "model.")
 		@Test
-		void passSourceModelWithATableLessThanTargetModel_ReturnsAResultWithaRemoveTableAction() {
+		void passSourceModelWithATableMoreThanTargetModel_ReturnsAResultWithACreateTableAction() {
+			// Prepare
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(new CreateTableChangeActionCRO().setSchemaName("public").setTableName("TABLE")) //
+			;
+			DataModelCMO sourceModel = //
+					DataModelCMO.of( //
+							SchemaCMO.of( //
+									"public", //
+									TableCMO.of("TABLE") //
+							) //
+					) //
+			;
+			DataModelCMO targetModel = //
+					DataModelCMO.of( //
+							SchemaCMO.of("public") //
+					) //
+			;
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a result with a create table action only if the source model has a table more than the "
+				+ "target model (with columns).")
+		@Test
+		void passSourceModelWithATableWithColumnsMoreThanTargetModel_ReturnsAResultWithOnlyACreateTableAction() {
+			// Prepare
+			ComparisonResultCRO expected = //
+					new ComparisonResultCRO() //
+							.addChangeActions( //
+									new CreateTableChangeActionCRO() //
+											.setSchemaName("public") //
+											.setTableName("TABLE").addColumns( //
+													new ColumnDataCRO() //
+															.setName("ID") //
+															.setSqlType("BIGINT") //
+											) //
+							) //
+			;
+			DataModelCMO sourceModel = //
+					DataModelCMO.of( //
+							SchemaCMO.of( //
+									"public", //
+									TableCMO.of( //
+											"TABLE", //
+											ColumnCMO.of( //
+													"ID", //
+													TypeCMO.of(Types.BIGINT, null, null), //
+													false) //
+									) //
+							) //
+					) //
+			;
+			DataModelCMO targetModel = //
+					DataModelCMO.of( //
+							SchemaCMO.of("public") //
+					) //
+			;
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a result with a drop table action if the source model has a table less than the target "
+				+ "model.")
+		@Test
+		void passSourceModelWithATableLessThanTargetModel_ReturnsAResultWithADropTableAction() {
 			// Prepare
 			ComparisonResultCRO expected = new ComparisonResultCRO() //
 					.addChangeActions( //
@@ -87,10 +158,10 @@ public class DataModelComparatorTest {
 			assertEquals(expected, returned);
 		}
 
-		@DisplayName("Returns a result with a add column action if a source model table has more columns than the "
+		@DisplayName("Returns a result with an add column action if a source model table has more columns than the "
 				+ "target model table.")
 		@Test
-		void passSourceModelWithATableWithMoreColumnsThanTheTargetModelTable_ReturnsAResultWithaAddColumnAction() {
+		void passSourceModelWithATableWithMoreColumnsThanTheTargetModelTable_ReturnsAResultWithAnAddColumnAction() {
 			// Prepare
 			ComparisonResultCRO expected = new ComparisonResultCRO() //
 					.addChangeActions( //

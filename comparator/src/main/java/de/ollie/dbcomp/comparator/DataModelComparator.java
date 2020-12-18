@@ -110,6 +110,7 @@ public class DataModelComparator {
 				.forEach(schema -> schema.getTables().entrySet() //
 						.stream() //
 						.map(Entry::getValue) //
+						.filter(table -> hasTable(targetModel, schema.getName(), table.getName())) //
 						.forEach(table -> table.getColumns().entrySet() //
 								.stream() //
 								.map(Entry::getValue) //
@@ -127,7 +128,14 @@ public class DataModelComparator {
 						) //
 				) //
 		;
+	}
 
+	private boolean hasTable(DataModelCMO model, String schemaName, String tableName) {
+		return model.getSchemaByName(schemaName) //
+				.orElse(SchemaCMO.of("n/a")) //
+				.getTableByName(tableName) //
+				.isPresent() //
+		;
 	}
 
 	private Optional<ColumnCMO> getColumn(DataModelCMO model, String schemaName, String tableName, String columnName) {

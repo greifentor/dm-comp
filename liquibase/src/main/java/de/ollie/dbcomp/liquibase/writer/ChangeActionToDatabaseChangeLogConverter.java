@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
+import de.ollie.dbcomp.liquibase.writer.processors.AddColumnChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.ChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.CreateTableChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.DropTableChangeProcessor;
@@ -20,6 +21,7 @@ import liquibase.changelog.DatabaseChangeLog;
 public class ChangeActionToDatabaseChangeLogConverter {
 
 	private static final List<ChangeProcessor> CHANGE_PROCESSORS = Arrays.asList( //
+			new AddColumnChangeProcessor(), //
 			new CreateTableChangeProcessor(), //
 			new DropTableChangeProcessor() //
 	);
