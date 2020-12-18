@@ -12,4 +12,9 @@
 			<column name="COLUMN" type="VARCHAR(42)" />
 		</createTable>
 	</changeSet>
+	<changeSet author="OlLie" id="create-table-no-schema-change-001">
+		<createTable tableName="TABLE_DIFF_COLUMNS">
+			<column name="IDENT" type="BIGINT" />
+		</createTable>
+	</changeSet>
 </databaseChangeLog>
