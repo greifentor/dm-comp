@@ -38,8 +38,6 @@ public class CompareCLICommand implements CLICommand {
 
 	private static final Logger LOG = LogManager.getLogger(CompareCLICommand.class);
 
-	private static final String EXPORT_FILE_NAME = "change-log.xml";
-
 	@Parameter(names = { "-s",
 			"--source" }, required = true, description = "The name of the file with the source model.")
 	private String sourceModelFileName;
@@ -55,6 +53,9 @@ public class CompareCLICommand implements CLICommand {
 	@Parameter(names = { "-tt",
 			"--targetType" }, description = "The type of the target model (call 'show' command for details).")
 	private ModelFileType targetModelFileType = ModelFileType.LIQUIBASE;
+
+	@Parameter(names = { "-o", "--output" }, description = "The name of the output file.")
+	private String outputFileName = "change-log.xml";
 
 	@Override
 	public String getCommandStr() {
@@ -116,7 +117,7 @@ public class CompareCLICommand implements CLICommand {
 						.forEach(System.out::println);
 			}
 		}
-		System.out.print(String.format("exporting change log to %s ... ", EXPORT_FILE_NAME));
+		System.out.print(String.format("exporting change log to %s ... ", outputFileName));
 		exportDatabaseChangeLog(
 				new ChangeActionToDatabaseChangeLogConverter().convert(comparisonResult.getChangeActions()));
 		System.out.println("done");
@@ -156,7 +157,7 @@ public class CompareCLICommand implements CLICommand {
 	private void exportDatabaseChangeLog(DatabaseChangeLog databaseChangeLog) {
 		PrintStream printStreamFile = null;
 		try {
-			printStreamFile = new PrintStream(EXPORT_FILE_NAME);
+			printStreamFile = new PrintStream(outputFileName);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
