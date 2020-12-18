@@ -28,4 +28,8 @@ public class Annotation {
 		return this;
 	}
 
+	public boolean hasElementWithKey(String key) {
+		return elementValues.containsKey(key);
+	}
+
 }

@@ -35,7 +35,7 @@ public class CLITest {
 					+ "        </createTable>\n" //
 					+ "        <dropTable schemaName=\"\" tableName=\"TABLE_TO_CREATE\"/>\n" //
 					+ "        <addColumn schemaName=\"\" tableName=\"TABLE_DIFF_COLUMNS\">\n" //
-					+ "            <column name=\"id\" type=\"BIGINT\"/>\n" //
+					+ "            <column name=\"ID\" type=\"BIGINT\"/>\n" //
 					+ "        </addColumn>\n" //
 					+ "        <dropColumn schemaName=\"\" tableName=\"TABLE\">\n" //
 					+ "            <column name=\"COLUMN\"/>\n" //

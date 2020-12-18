@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import de.ollie.blueprints.codereader.java.model.Annotation;
+import de.ollie.blueprints.codereader.java.model.ElementValuePair;
 import de.ollie.blueprints.codereader.java.model.FieldDeclaration;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.TypeCMO;
@@ -70,6 +72,30 @@ public class FieldDeclarationToColumnCMOConverterTest {
 		FieldDeclaration field = new FieldDeclaration() //
 				.setName(NAME) //
 				.setType("String") //
+		;
+		// Ausführung
+		ColumnCMO returned = unitUnderTest.convert(field);
+		// Prüfung
+		assertEquals(expected, returned);
+	}
+
+	@DisplayName("Returns a matching ColumnCMO for a passed field declaration with @Column(name) annotation.")
+	@Test
+	void passCorrectFieldDeclarationWithColumnAnnotationAndSetName_ReturnsAMatchingColumnCMO() {
+		// Vorbereitung
+		ColumnCMO expected = ColumnCMO.of(NAME, TypeCMO.of(Types.VARCHAR, 255, null), false);
+		FieldDeclaration field = new FieldDeclaration() //
+				.setName(NAME + 1) //
+				.setType("String") //
+				.addAnnotations( //
+						new Annotation() //
+								.setName("Column") //
+								.addElementValues( //
+										new ElementValuePair() //
+												.setKey("name") //
+												.setValue("\"" + NAME + "\"") //
+								) //
+				) //
 		;
 		// Ausführung
 		ColumnCMO returned = unitUnderTest.convert(field);

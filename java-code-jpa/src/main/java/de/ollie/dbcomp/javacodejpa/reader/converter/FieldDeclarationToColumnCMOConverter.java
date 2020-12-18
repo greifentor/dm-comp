@@ -5,6 +5,7 @@ import java.sql.Types;
 import de.ollie.blueprints.codereader.java.model.FieldDeclaration;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.TypeCMO;
+import de.ollie.dbcomp.util.Cutter;
 
 public class FieldDeclarationToColumnCMOConverter {
 
@@ -13,10 +14,20 @@ public class FieldDeclarationToColumnCMOConverter {
 			return null;
 		}
 		return ColumnCMO.of( //
-				field.getName(), //
+				getName(field), //
 				getType(field.getType()), //
 				false //
 		);
+	}
+
+	private String getName(FieldDeclaration field) {
+		return field.getAnnotations() //
+				.stream() //
+				.filter(annotation -> annotation.getName().equals("Column") && annotation.hasElementWithKey("name")) //
+				.findFirst() //
+				.map(annotation -> Cutter.cutQuotes(annotation.getElementValues().get("name"))) //
+				.orElse(field.getName()) //
+		;
 	}
 
 	private TypeCMO getType(String typeName) {
