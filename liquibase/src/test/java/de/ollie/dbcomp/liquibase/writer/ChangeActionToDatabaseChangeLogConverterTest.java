@@ -21,6 +21,7 @@ import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
@@ -125,7 +126,7 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			assertEquals(expected, returned);
 		}
 
-		@DisplayName("Returns a DatabaseChangeLog with two ChangeSets and some CreateTableChanges and AddColumnChanges.")
+		@DisplayName("Returns a DatabaseChangeLog with one ChangeSet and some CreateTableChanges and AddColumnChanges.")
 		@Test
 		void passAListWithAnAddColumnChange_ReturnsADatabaseChangeLogsWithTheCorrectChanges() throws Exception {
 			// Prepare
@@ -147,6 +148,34 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 							.setTableName(TABLE_NAME + 2) //
 							.setColumnName(COLUMN_NAME + 1) //
 							.setSqlType("BIGINT") //
+			);
+			// Run
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r", "");
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a DatabaseChangeLog with a DropColumnChange.")
+		@Test
+		void passAListWithADropColumnChange_ReturnsADatabaseChangeLogsWithTheCorrectChanges() throws Exception {
+			// Prepare
+			String expected = XML_HEADER //
+					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" objectQuotingStrategy=\"LEGACY\" runOnChange=\"true\">\n" //
+					+ "        <createTable tableName=\"table1\">\n" //
+					+ "            <column name=\"column\" type=\"sql type\"/>\n" //
+					+ "        </createTable>\n" //
+					+ "        <dropColumn tableName=\"table2\">\n" //
+					+ "            <column name=\"column1\"/>\n" //
+					+ "        </dropColumn>\n" //
+					+ "    </changeSet>\n" //
+					+ "</databaseChangeLog>\n";
+			List<ChangeActionCRO> actions = Arrays.asList( //
+					new CreateTableChangeActionCRO() //
+							.setTableName(TABLE_NAME + 1) //
+							.addColumns(new ColumnDataCRO().setName(COLUMN_NAME).setSqlType(SQL_TYPE_NAME)), //
+					new DropColumnChangeActionCRO() //
+							.setTableName(TABLE_NAME + 2) //
+							.setColumnName(COLUMN_NAME + 1) //
 			);
 			// Run
 			String returned = databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r", "");

@@ -8,6 +8,7 @@ import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.liquibase.writer.processors.AddColumnChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.ChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.CreateTableChangeProcessor;
+import de.ollie.dbcomp.liquibase.writer.processors.DropColumnChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.DropTableChangeProcessor;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -23,6 +24,7 @@ public class ChangeActionToDatabaseChangeLogConverter {
 	private static final List<ChangeProcessor> CHANGE_PROCESSORS = Arrays.asList( //
 			new AddColumnChangeProcessor(), //
 			new CreateTableChangeProcessor(), //
+			new DropColumnChangeProcessor(), //
 			new DropTableChangeProcessor() //
 	);
 
@@ -32,8 +34,8 @@ public class ChangeActionToDatabaseChangeLogConverter {
 		}
 		DatabaseChangeLog result = new DatabaseChangeLog("change-log.xml");
 		if (!changeActions.isEmpty()) {
-			ChangeSet changeSet = new ChangeSet("ADD-CHANGE-SET-ID-HERE", "dm-comp", false, true, null, null, null,
-					result);
+			ChangeSet changeSet = new ChangeSet(
+					"ADD-CHANGE-SET-ID-HERE", "dm-comp", false, true, null, null, null, result);
 			result.addChangeSet(changeSet);
 			changeActions //
 					.forEach(action -> createChange(action).ifPresent(changeSet::addChange));

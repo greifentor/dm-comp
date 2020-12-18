@@ -16,6 +16,7 @@ import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
@@ -185,6 +186,40 @@ public class DataModelComparatorTest {
 					SchemaCMO.of( //
 							"public", //
 							TableCMO.of("TABLE") //
+					) //
+			);
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a result with a drop column action if a source model table has less columns than the "
+				+ "target model table.")
+		@Test
+		void passSourceModelWithATableWithLessColumnsThanTheTargetModelTable_ReturnsAResultWithADropColumnAction() {
+			// Prepare
+			ComparisonResultCRO expected = new ComparisonResultCRO() //
+					.addChangeActions( //
+							new DropColumnChangeActionCRO() //
+									.setSchemaName("public") //
+									.setTableName("TABLE") //
+									.setColumnName("COLUMN_NAME") //
+					) //
+			;
+			DataModelCMO sourceModel = DataModelCMO.of( //
+					SchemaCMO.of( //
+							"public", //
+							TableCMO.of("TABLE") //
+					) //
+			);
+			DataModelCMO targetModel = DataModelCMO.of( //
+					SchemaCMO.of( //
+							"public", //
+							TableCMO.of( //
+									"TABLE", //
+									ColumnCMO.of("COLUMN_NAME", TypeCMO.of(Types.BIGINT, null, null), false) //
+							) //
 					) //
 			);
 			// Run

@@ -11,6 +11,7 @@ import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
@@ -43,6 +44,7 @@ public class DataModelComparator {
 		addCreateTableChangeActions(sourceModel, targetModel, result);
 		addDropTableChangeActions(sourceModel, targetModel, result);
 		addAddColumnChangeActions(sourceModel, targetModel, result);
+		addDropColumnChangeActions(sourceModel, targetModel, result);
 		return result;
 	}
 
@@ -117,11 +119,12 @@ public class DataModelComparator {
 								.forEach(column -> {
 									if (getColumn(targetModel, schema.getName(), table.getName(), column.getName())
 											.isEmpty()) { //
-										result.addChangeActions(new AddColumnChangeActionCRO() //
-												.setColumnName(column.getName()) //
-												.setSchemaName(schema.getName()) //
-												.setSqlType("BIGINT") //
-												.setTableName(table.getName()) //
+										result.addChangeActions( //
+												new AddColumnChangeActionCRO() //
+														.setColumnName(column.getName()) //
+														.setSchemaName(schema.getName()) //
+														.setSqlType("BIGINT") //
+														.setTableName(table.getName()) //
 										);
 									}
 								}) //
@@ -144,6 +147,34 @@ public class DataModelComparator {
 				.getTableByName(tableName) //
 				.orElse(TableCMO.of("n/a")) //
 				.getColumnByName(columnName) //
+		;
+	}
+
+	private void addDropColumnChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		targetModel.getSchemata().entrySet() //
+				.stream() //
+				.map(Entry::getValue) //
+				.forEach(schema -> schema.getTables().entrySet() //
+						.stream() //
+						.map(Entry::getValue) //
+						.filter(table -> hasTable(sourceModel, schema.getName(), table.getName())) //
+						.forEach(table -> table.getColumns().entrySet() //
+								.stream() //
+								.map(Entry::getValue) //
+								.forEach(column -> {
+									if (getColumn(sourceModel, schema.getName(), table.getName(), column.getName())
+											.isEmpty()) { //
+										result.addChangeActions( //
+												new DropColumnChangeActionCRO() //
+														.setColumnName(column.getName()) //
+														.setSchemaName(schema.getName()) //
+														.setTableName(table.getName()) //
+										);
+									}
+								}) //
+						) //
+				) //
 		;
 	}
 
