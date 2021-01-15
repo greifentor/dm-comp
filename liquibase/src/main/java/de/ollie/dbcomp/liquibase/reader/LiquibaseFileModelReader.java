@@ -160,11 +160,17 @@ public class LiquibaseFileModelReader {
 	}
 
 	public static ColumnCMO getColumn(TableCMO table, ColumnConfig columnConfig, ImportReport importReport) {
-		return ColumnCMO.of( //
-				columnConfig.getName(), //
-				getType(columnConfig, importReport), //
-				columnConfig.isAutoIncrement()//
+		return ColumnCMO
+				.of(
+						columnConfig.getName(),
+						getType(columnConfig, importReport),
+						columnConfig.isAutoIncrement(),
+						getNullable(columnConfig)
 		);
+	}
+
+	private static boolean getNullable(ColumnConfig columnConfig) {
+		return columnConfig.getConstraints() != null ? columnConfig.getConstraints().isNullable() : true;
 	}
 
 	// TODO: Types should be managed by special classes (independent from the

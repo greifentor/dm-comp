@@ -15,17 +15,19 @@ public class ColumnCMO {
 
 	private Boolean autoIncrement;
 	private String name;
+	private boolean nullable = true;
 	private TypeCMO type;
 
 	private ColumnCMO() {
 		super();
 	}
 
-	public static ColumnCMO of(String name, TypeCMO type, Boolean autoIncrement) {
-		return new ColumnCMO() //
-				.setAutoIncrement(autoIncrement) //
-				.setName(name) //
-				.setType(type) //
+	public static ColumnCMO of(String name, TypeCMO type, Boolean autoIncrement, Boolean nullable) {
+		return new ColumnCMO()
+				.setAutoIncrement(autoIncrement)
+				.setName(name)
+				.setNullable(nullable != null && !nullable ? false : true)
+				.setType(type)
 		;
 	}
 
