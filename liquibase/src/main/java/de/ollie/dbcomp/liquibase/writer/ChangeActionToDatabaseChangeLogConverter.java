@@ -11,6 +11,7 @@ import de.ollie.dbcomp.liquibase.writer.processors.CreateTableChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.DropColumnChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.DropTableChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.ModifyDataTypeChangeProcessor;
+import de.ollie.dbcomp.liquibase.writer.processors.ModifyNullableChangeProcessor;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -22,13 +23,15 @@ import liquibase.changelog.DatabaseChangeLog;
  */
 public class ChangeActionToDatabaseChangeLogConverter {
 
-	private static final List<ChangeProcessor> CHANGE_PROCESSORS = Arrays.asList( //
-			new AddColumnChangeProcessor(), //
-			new CreateTableChangeProcessor(), //
-			new DropColumnChangeProcessor(), //
-			new DropTableChangeProcessor(), //
-			new ModifyDataTypeChangeProcessor() //
-	);
+	private static final List<ChangeProcessor> CHANGE_PROCESSORS =
+			Arrays
+					.asList(
+							new AddColumnChangeProcessor(),
+							new CreateTableChangeProcessor(),
+							new DropColumnChangeProcessor(),
+							new DropTableChangeProcessor(),
+							new ModifyDataTypeChangeProcessor(),
+							new ModifyNullableChangeProcessor());
 
 	public DatabaseChangeLog convert(List<ChangeActionCRO> changeActions) {
 		if (changeActions == null) {
@@ -36,22 +39,20 @@ public class ChangeActionToDatabaseChangeLogConverter {
 		}
 		DatabaseChangeLog result = new DatabaseChangeLog("change-log.xml");
 		if (!changeActions.isEmpty()) {
-			ChangeSet changeSet = new ChangeSet(
-					"ADD-CHANGE-SET-ID-HERE", "dm-comp", false, true, null, null, null, result);
+			ChangeSet changeSet =
+					new ChangeSet("ADD-CHANGE-SET-ID-HERE", "dm-comp", false, true, null, null, null, result);
 			result.addChangeSet(changeSet);
-			changeActions //
-					.forEach(action -> createChange(action).ifPresent(changeSet::addChange));
+			changeActions.forEach(action -> createChange(action).ifPresent(changeSet::addChange));
 		}
 		return result;
 	}
 
 	private Optional<Change> createChange(ChangeActionCRO action) {
-		return CHANGE_PROCESSORS //
-				.stream() //
-				.filter(processor -> processor.isToProcess(action)) //
-				.findFirst() //
-				.map(processor -> processor.process(action)) //
-		;
+		return CHANGE_PROCESSORS
+				.stream()
+				.filter(processor -> processor.isToProcess(action))
+				.findFirst()
+				.map(processor -> processor.process(action));
 	}
 
 }

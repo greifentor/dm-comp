@@ -15,5 +15,6 @@ public class ColumnDataCRO {
 
 	private String name;
 	private String sqlType;
+	private boolean nullable = true;
 
 }
