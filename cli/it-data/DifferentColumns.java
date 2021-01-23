@@ -1,7 +1,7 @@
 package test;
 
 @Entity
-@Table("TABLE_DIFF_COLUMNS")
+@Table(name = "TABLE_DIFF_COLUMNS")
 public class DifferentColumns {
 
 	@Column(name = "ID")

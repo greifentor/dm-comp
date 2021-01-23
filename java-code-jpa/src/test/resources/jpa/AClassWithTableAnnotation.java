@@ -1,6 +1,6 @@
 package jpa;
 
 @Entity
-@Table("ATABLE")
+@Table(name = "ATABLE")
 public class AClass {
 }

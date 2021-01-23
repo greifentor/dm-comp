@@ -54,9 +54,10 @@ public class JavaCodeFileModelReader {
 	public ReaderResult read(String pathName) throws Exception {
 		ImportReport importReport = new ImportReport();
 		return new ReaderResult() //
-				.setDataModel(createDataModel(
-						getCompilationUnits(new ArrayList<>(), new File(pathName), new JavaCodeConverter()),
-						importReport)) //
+				.setDataModel(
+						createDataModel(
+								getCompilationUnits(new ArrayList<>(), new File(pathName), new JavaCodeConverter()),
+								importReport)) //
 				.setImportReport(importReport);
 	}
 
@@ -76,12 +77,14 @@ public class JavaCodeFileModelReader {
 	}
 
 	private DataModelCMO createDataModel(List<CompilationUnit> compilationUnits, ImportReport importReport) {
-		return DataModelCMO.of( //
-				SchemaCMO.of( //
-						"", //
-						getTables(compilationUnits, importReport) //
-				) //
-		);
+		return DataModelCMO
+				.of( //
+						SchemaCMO
+								.of( //
+										"", //
+										getTables(compilationUnits, importReport) //
+								) //
+				);
 	}
 
 	private TableCMO[] getTables(List<CompilationUnit> compilationUnits, ImportReport importReport) {
@@ -98,7 +101,8 @@ public class JavaCodeFileModelReader {
 	}
 
 	private Optional<Annotation> getAnnotationWithName(String name, ClassDeclaration classDeclaration) {
-		return classDeclaration.getAnnotations() //
+		return classDeclaration
+				.getAnnotations() //
 				.stream() //
 				.filter(annotation -> annotation.getName().equals(name)) //
 				.findFirst() //
@@ -107,13 +111,14 @@ public class JavaCodeFileModelReader {
 
 	private String getTableName(ClassDeclaration classDeclaration) {
 		return getAnnotationWithName("Table", classDeclaration) //
-				.map(annotation -> cutQuotes(annotation.getValue())) //
+				.map(annotation -> cutQuotes(annotation.getElementValues().get("name"))) //
 				.orElse(classDeclaration.getName()) //
 		;
 	}
 
 	private ColumnCMO[] getColumns(ClassDeclaration classDeclaration) {
-		return classDeclaration.getFields() //
+		return classDeclaration
+				.getFields() //
 				.stream() //
 				.map(fieldDeclarationToColumnCMOConverter::convert) //
 				.collect(Collectors.toList()) //

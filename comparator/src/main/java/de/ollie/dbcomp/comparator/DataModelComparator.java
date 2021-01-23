@@ -84,8 +84,34 @@ public class DataModelComparator {
 	}
 
 	private String getSQLType(TypeCMO type) {
-		if (type.getSqlType() == Types.LONGVARCHAR) {
+		if (type.getSqlType() == Types.BIGINT) {
+			return "BIGINT";
+		} else if (type.getSqlType() == Types.BIT) {
+			return "BIT";
+		} else if (type.getSqlType() == Types.BOOLEAN) {
+			return "BOOLEAN";
+		} else if (type.getSqlType() == Types.DATE) {
+			return "DATE";
+		} else if (type.getSqlType() == Types.DECIMAL) {
+			return "DECIMAL(" + type.getLength() + ", " + type.getDecimalPlace() + ")";
+		} else if (type.getSqlType() == Types.DOUBLE) {
+			return "DOUBLE";
+		} else if (type.getSqlType() == Types.FLOAT) {
+			return "FLOAT";
+		} else if (type.getSqlType() == Types.INTEGER) {
+			return "INTEGER";
+		} else if (type.getSqlType() == Types.LONGVARCHAR) {
 			return "LONGVARCHAR";
+		} else if (type.getSqlType() == Types.NUMERIC) {
+			return "NUMERIC";
+		} else if (type.getSqlType() == Types.SMALLINT) {
+			return "SMALLINT";
+		} else if (type.getSqlType() == Types.TIME) {
+			return "TIME";
+		} else if (type.getSqlType() == Types.TIMESTAMP) {
+			return "TIMESTAMP";
+		} else if (type.getSqlType() == Types.TINYINT) {
+			return "TINYINT";
 		} else if (type.getSqlType() == Types.VARCHAR) {
 			return "VARCHAR(" + type.getLength() + ")";
 		}
