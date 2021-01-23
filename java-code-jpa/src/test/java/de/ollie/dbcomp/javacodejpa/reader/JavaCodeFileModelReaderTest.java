@@ -25,10 +25,15 @@ import de.ollie.dbcomp.report.ImportReport;
 public class JavaCodeFileModelReaderTest {
 
 	@Spy
-	private FieldDeclarationToColumnCMOConverter fieldDeclarationToColumnCMOConverter = new FieldDeclarationToColumnCMOConverter();
+	private FieldDeclarationToColumnCMOConverter fieldDeclarationToColumnCMOConverter =
+			new FieldDeclarationToColumnCMOConverter();
 
 	@InjectMocks
 	private JavaCodeFileModelReader unitUnderTest;
+
+	private static ReaderResult createReaderResult(TableCMO... tables) {
+		return new ReaderResult().setDataModel(DataModelCMO.of(new SchemaCMO[] { SchemaCMO.of("", tables) }));
+	}
 
 	@DisplayName("Tests of table reads")
 	@Nested
@@ -38,17 +43,7 @@ public class JavaCodeFileModelReaderTest {
 		@Test
 		void readsTableInformationFromASourceCodeFile() throws Exception {
 			// Prepare
-			ReaderResult expected = new ReaderResult() //
-					.setDataModel( //
-							DataModelCMO.of( //
-									SchemaCMO.of( //
-											"", //
-											new TableCMO[] { TableCMO.of("AClass") } //
-									) //
-							) //
-					) //
-					.setImportReport(new ImportReport()) //
-			;
+			ReaderResult expected = createReaderResult(TableCMO.of("AClass")).setImportReport(new ImportReport());
 			// Run
 			ReaderResult returned = unitUnderTest.read("src/test/resources/jpa/AClass.java");
 			// Check
@@ -59,17 +54,7 @@ public class JavaCodeFileModelReaderTest {
 		@Test
 		void readsTableInformationWithAlternateTableNameFromASourceCodeFile() throws Exception {
 			// Prepare
-			ReaderResult expected = new ReaderResult() //
-					.setDataModel( //
-							DataModelCMO.of( //
-									SchemaCMO.of( //
-											"", //
-											new TableCMO[] { TableCMO.of("ATABLE") } //
-									) //
-							) //
-					) //
-					.setImportReport(new ImportReport()) //
-			;
+			ReaderResult expected = createReaderResult(TableCMO.of("ATABLE")).setImportReport(new ImportReport());
 			// Run
 			ReaderResult returned = unitUnderTest.read("src/test/resources/jpa/AClassWithTableAnnotation.java");
 			// Check
@@ -80,40 +65,18 @@ public class JavaCodeFileModelReaderTest {
 		@Test
 		void readsTableInformationWithIncludingColumnsFromASourceCodeFile() throws Exception {
 			// Prepare
-			ReaderResult expected = new ReaderResult() //
-					.setDataModel( //
-							DataModelCMO.of( //
-									SchemaCMO.of( //
-											"", //
-											new TableCMO[] { //
-													TableCMO.of("AClassWithColumns") //
-															.addColumns( //
-																	ColumnCMO.of( //
-																			"id", //
-																			TypeCMO.of(Types.BIGINT, null, null), //
-																			false //
-																	), //
-																	ColumnCMO.of( //
-																			"count", //
-																			TypeCMO.of(Types.INTEGER, null, null), //
-																			false //
-																	), //
-																	ColumnCMO.of( //
-																			"name", //
-																			TypeCMO.of(Types.VARCHAR, 255, null), //
-																			false //
-																	) //
-															) //
-											} //
-									) //
-							) //
-					) //
-					.setImportReport(new ImportReport()) //
-			;
-
+			ReaderResult expected =
+					createReaderResult(
+							TableCMO
+									.of("AClassWithColumns")
+									.addColumns(
+											ColumnCMO.of("id", TypeCMO.of(Types.BIGINT, null, null), false, false),
+											ColumnCMO.of("count", TypeCMO.of(Types.INTEGER, null, null), false, false),
+											ColumnCMO.of("name", TypeCMO.of(Types.VARCHAR, 255, null), false, false),
+											ColumnCMO.of("title", TypeCMO.of(Types.VARCHAR, 255, null), false, null)))
+													.setImportReport(new ImportReport());
 			// Run
 			ReaderResult returned = unitUnderTest.read("src/test/resources/jpa/AClassWithColumns.java");
-
 			// Check
 			assertEquals(expected, returned);
 		}

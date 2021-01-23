@@ -1,6 +1,7 @@
 package de.ollie.dbcomp.util;
 
 import java.sql.Types;
+import java.util.Set;
 
 /**
  * A converter for Types to DBType and vice versa.
@@ -52,4 +53,16 @@ public class TypeConverter {
 		throw new IllegalArgumentException("there is no mapping for data type value: " + dataType);
 	}
 
+	private static final Set<String> JAVA_SIMPLE_TYPE_NAMES =
+			Set.of("boolean", "byte", "char", "double", "float", "int", "long", "short");
+
+	/**
+	 * Checks the passed type name if it is the name of a simple type.
+	 * 
+	 * @param typeName The name of the type to check.
+	 * @return "true" if the passed type name is a simple Java type.
+	 */
+	public boolean isSimpleType(String typeName) {
+		return (typeName != null) && JAVA_SIMPLE_TYPE_NAMES.contains(typeName);
+	}
 }
