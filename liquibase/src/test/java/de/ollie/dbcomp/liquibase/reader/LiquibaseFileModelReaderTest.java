@@ -169,6 +169,28 @@ public class LiquibaseFileModelReaderTest {
 			assertEquals(expected, returned);
 		}
 
+		@DisplayName("Should add a field to a table (master changelog).")
+		@Test
+		void passLiquibaseFilesForAnAutoIncrementAdditionWithMasterChangeLog_CreatesAModelWithPublicSchemeAndTheTableWithAutoIncrementFields()
+				throws Exception {
+			// Prepare
+			DataModelCMO expected =
+					createModel(
+							TableCMO
+									.of("TABLE")
+									.addColumns(
+											ColumnCMO.of("COLUMN", TypeCMO.of(Types.BIGINT, null, null), true, null)));
+			unitUnderTest =
+					new LiquibaseFileModelReader(
+							new TypeConverter(),
+							new File(BASE_PATH),
+							new File("master-changelog.xml"));
+			// Run
+			DataModelCMO returned = unitUnderTest.read().getDataModel();
+			// Check
+			assertEquals(expected, returned);
+		}
+
 		@DisplayName("Adds a specific entry to the report if table does not exists.")
 		@Test
 		void passLiquibaseFilesForAnAutoIncrementAddition_TableDoesNotExists_AddsASpecificEntryToTheReport()
