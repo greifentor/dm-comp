@@ -27,32 +27,44 @@ public class CLITest {
 		@Test
 		void happyRun(@TempDir Path out) throws Exception {
 			// Prepare
-			String expectedContent = "<?xml version=\"1.1\" encoding=\"UTF-8\" standalone=\"no\"?>\n" //
-					+ "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:pro=\"http://www.liquibase.org/xml/ns/pro\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd\">\n" //
-					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" objectQuotingStrategy=\"LEGACY\" runOnChange=\"true\">\n" //
-					+ "        <createTable schemaName=\"\" tableName=\"AClass\">\n" //
-					+ "            <column name=\"id\" type=\"BIGINT\"/>\n" //
-					+ "        </createTable>\n" //
-					+ "        <dropTable schemaName=\"\" tableName=\"TABLE_TO_CREATE\"/>\n" //
-					+ "        <addColumn schemaName=\"\" tableName=\"TABLE_DIFF_COLUMNS\">\n" //
-					+ "            <column name=\"ID\" type=\"BIGINT\"/>\n" //
-					+ "        </addColumn>\n" //
-					+ "        <dropColumn schemaName=\"\" tableName=\"TABLE\">\n" //
-					+ "            <column name=\"COLUMN\"/>\n" //
-					+ "        </dropColumn>\n" //
-					+ "        <dropColumn schemaName=\"\" tableName=\"TABLE_DIFF_COLUMNS\">\n" //
-					+ "            <column name=\"IDENT\"/>\n" //
-					+ "        </dropColumn>\n" //
-					+ "        <modifyDataType columnName=\"NAME\" newDataType=\"VARCHAR(255)\" schemaName=\"\" tableName=\"TABLE_DIFF_COLUMNS\"/>\n" //
-					+ "    </changeSet>\n" //
-					+ "</databaseChangeLog>\n";
+			String expectedContent =
+					"<?xml version=\"1.1\" encoding=\"UTF-8\" standalone=\"no\"?>\n" //
+							+ "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:pro=\"http://www.liquibase.org/xml/ns/pro\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd\">\n" //
+							+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" objectQuotingStrategy=\"LEGACY\" runOnChange=\"true\">\n" //
+							+ "        <createTable schemaName=\"\" tableName=\"AClass\">\n" //
+							+ "            <column name=\"id\" type=\"BIGINT\"/>\n" //
+							+ "        </createTable>\n" //
+							+ "        <dropTable schemaName=\"\" tableName=\"TABLE_TO_CREATE\"/>\n" //
+							+ "        <addColumn schemaName=\"\" tableName=\"TABLE_DIFF_COLUMNS\">\n" //
+							+ "            <column name=\"ID\" type=\"INTEGER\"/>\n" //
+							+ "        </addColumn>\n" //
+							+ "        <dropColumn schemaName=\"\" tableName=\"TABLE\">\n" //
+							+ "            <column name=\"COLUMN\"/>\n" //
+							+ "        </dropColumn>\n" //
+							+ "        <dropColumn schemaName=\"\" tableName=\"TABLE_DIFF_COLUMNS\">\n" //
+							+ "            <column name=\"IDENT\"/>\n" //
+							+ "        </dropColumn>\n" //
+							+ "        <modifyDataType columnName=\"NAME\" newDataType=\"VARCHAR(255)\" schemaName=\"\" tableName=\"TABLE_DIFF_COLUMNS\"/>\n" //
+							+ "    </changeSet>\n" //
+							+ "</databaseChangeLog>\n";
 			String outputFileName = out.toString() + "/out.xml";
 			int expected = 0;
 			// Run
-			int returned = unitUnderTest.start("compare", "-st", "JAVA", "-s", "it-data", "-t",
-					"it-data/testTargetSchema.xml", "-o", outputFileName);
+			int returned =
+					unitUnderTest
+							.start(
+									"compare",
+									"-st",
+									"JAVA",
+									"-s",
+									"it-data",
+									"-t",
+									"it-data/testTargetSchema.xml",
+									"-o",
+									outputFileName);
 			// Check
-			assertEquals(expectedContent,
+			assertEquals(
+					expectedContent,
 					Files.readString(Path.of(outputFileName)).replace("\r\n", "\n").replace("\r", "\n"));
 			assertEquals(expected, returned);
 		}

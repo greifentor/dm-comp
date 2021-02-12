@@ -166,7 +166,8 @@ public class DataModelComparator {
 																		new AddColumnChangeActionCRO()
 																				.setColumnName(column.getName())
 																				.setSchemaName(schema.getName())
-																				.setSqlType("BIGINT")
+																				.setSqlType(
+																						getSQLType(column.getType()))
 																				.setTableName(table.getName()));
 													}
 												})));
