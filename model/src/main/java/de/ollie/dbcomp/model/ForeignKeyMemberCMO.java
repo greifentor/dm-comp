@@ -13,18 +13,22 @@ import lombok.experimental.Accessors;
 @Data
 public class ForeignKeyMemberCMO {
 
-	private ColumnCMO referencee;
-	private ColumnCMO referencer;
+	private ColumnCMO referenceeColumn;
+	private TableCMO referenceeTable;
+	private ColumnCMO referencerColumn;
+	private TableCMO referencerTable;
 
 	private ForeignKeyMemberCMO() {
 		super();
 	}
 
-	public static ForeignKeyMemberCMO of(ColumnCMO referencee, ColumnCMO referencer) {
-		return new ForeignKeyMemberCMO() //
-				.setReferencee(referencee) //
-				.setReferencer(referencer) //
-		;
+	public static ForeignKeyMemberCMO of(TableCMO referenceeTable, ColumnCMO referenceeColumn, TableCMO referencerTable,
+			ColumnCMO referencerColumn) {
+		return new ForeignKeyMemberCMO()
+				.setReferenceeTable(referenceeTable)
+				.setReferenceeColumn(referenceeColumn)
+				.setReferencerTable(referencerTable)
+				.setReferencerColumn(referencerColumn);
 	}
 
 }

@@ -1,5 +1,7 @@
 package de.ollie.dbcomp.model;
 
+import static de.ollie.dbcomp.util.Check.ensure;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -41,6 +43,16 @@ public class TableCMO {
 		return this;
 	}
 
+	public TableCMO addForeignKeys(ForeignKeyCMO... foreignKeys) {
+		for (ForeignKeyCMO foreignKey : foreignKeys) {
+			ensure(
+					foreignKey.getMembers().stream().anyMatch(fk -> fk.getReferenceeTable() == this),
+					"fk base table must be the same table as the fk ist assgined to.");
+			this.foreignKeys.put(foreignKey.getName(), foreignKey);
+		}
+		return this;
+	}
+
 	public TableCMO addPrimaryKeys(String... columnNames) {
 		for (String columnName : columnNames) {
 			getColumnByName(columnName.trim()) //
@@ -52,6 +64,18 @@ public class TableCMO {
 							});
 		}
 		return this;
+	}
+
+	public boolean hasForeignKey(ForeignKeyCMO foreignKey) {
+		return foreignKeys.entrySet().stream().anyMatch(fk -> isEqual(fk.getValue(), foreignKey));
+	}
+
+	private boolean isEqual(ForeignKeyCMO fk0, ForeignKeyCMO fk1) {
+		return fk0.getMembers().stream().allMatch(fkm -> containsForeignKeyMember(fk1, fkm));
+	}
+
+	private boolean containsForeignKeyMember(ForeignKeyCMO fk, ForeignKeyMemberCMO fkm) {
+		return fk.getMembers().stream().anyMatch(fkm0 -> fkm0.equals(fkm));
 	}
 
 	public Optional<ColumnCMO> getColumnByName(String name) {

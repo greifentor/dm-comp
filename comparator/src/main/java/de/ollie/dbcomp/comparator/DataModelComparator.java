@@ -12,11 +12,14 @@ import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.DropForeignKeyCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.ForeignKeyMemberCRO;
 import de.ollie.dbcomp.comparator.model.actions.ModifyDataTypeCRO;
 import de.ollie.dbcomp.comparator.model.actions.ModifyNullableCRO;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
+import de.ollie.dbcomp.model.ForeignKeyCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
 import de.ollie.dbcomp.model.TypeCMO;
@@ -48,6 +51,7 @@ public class DataModelComparator {
 		addAddColumnChangeActions(sourceModel, targetModel, result);
 		addDropColumnChangeActions(sourceModel, targetModel, result);
 		addModifyChangeActions(sourceModel, targetModel, result);
+		addDropForeignKeyChangeActions(sourceModel, targetModel, result);
 		return result;
 	}
 
@@ -276,6 +280,62 @@ public class DataModelComparator {
 												.setTableName(tableName));
 					}
 				});
+	}
+
+	private void addDropForeignKeyChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		sourceModel
+				.getSchemata()
+				.entrySet()
+				.stream()
+				.map(Entry::getValue)
+				.forEach(
+						schema -> schema
+								.getTables()
+								.entrySet()
+								.stream()
+								.map(Entry::getValue)
+								.filter(table -> hasTable(targetModel, schema.getName(), table.getName()))
+								.forEach(
+										table -> table
+												.getForeignKeys()
+												.entrySet()
+												.stream()
+												.map(Entry::getValue)
+												.forEach(
+														fk -> checkForForeignKey(
+																fk,
+																table.getName(),
+																schema.getName(),
+																targetModel,
+																result))));
+	}
+
+	private void checkForForeignKey(ForeignKeyCMO foreignKey, String tableName, String schemaName,
+			DataModelCMO targetModel, ComparisonResultCRO result) {
+		targetModel.getSchemaByName(schemaName).ifPresent(schema -> schema.getTableByName(tableName).map(table -> {
+			System.out.println(table.getName());
+			System.out.println(!table.hasForeignKey(foreignKey));
+			return table;
+		})
+				.filter(table -> !table.hasForeignKey(foreignKey))
+				.ifPresent(
+						table -> result.addChangeActions(new DropForeignKeyCRO().addMembers(getMembers(foreignKey)))));
+
+	}
+
+	private ForeignKeyMemberCRO[] getMembers(ForeignKeyCMO foreignKey) {
+		return foreignKey
+				.getMembers()
+				.stream()
+				.map(
+						member -> new ForeignKeyMemberCRO()
+								.setBaseColumnName(member.getReferencerColumn().getName())
+								.setBaseTableName(member.getReferencerTable().getName())
+								.setReferencedColumnName(member.getReferenceeColumn().getName())
+								.setReferencedTableName(member.getReferenceeTable().getName()))
+				.collect(Collectors.toList())
+				.toArray(new ForeignKeyMemberCRO[foreignKey.getMembers().size()]);
 	}
 
 }
