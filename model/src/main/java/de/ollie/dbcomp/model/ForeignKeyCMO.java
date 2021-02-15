@@ -24,10 +24,7 @@ public class ForeignKeyCMO {
 	}
 
 	public static ForeignKeyCMO of(String name, ForeignKeyMemberCMO... members) {
-		return new ForeignKeyCMO() //
-				.addMembers(members) //
-				.setName(name) //
-		;
+		return new ForeignKeyCMO().addMembers(members).setName(name);
 	}
 
 	public ForeignKeyCMO addMembers(ForeignKeyMemberCMO... members) {

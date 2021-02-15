@@ -10,20 +10,20 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * A container for a drop foreign key change action.
+ * A container for a add foreign key change action.
  *
- * @author ollie (13.02.2021)
+ * @author ollie (15.02.2021)
  */
 @Accessors(chain = true)
 @Data
-public class DropForeignKeyCRO implements ChangeActionCRO {
+public class AddForeignKeyCRO implements ChangeActionCRO {
 
 	private String tableName;
 	private String schemaName;
 
 	private List<ForeignKeyMemberCRO> members = new ArrayList<>();
 
-	public DropForeignKeyCRO addMembers(ForeignKeyMemberCRO... members) {
+	public AddForeignKeyCRO addMembers(ForeignKeyMemberCRO... members) {
 		for (ForeignKeyMemberCRO member : members) {
 			ensure(
 					member.getBaseTableName().equals(tableName),

@@ -55,6 +55,55 @@ public class TableCMOTest {
 			assertTrue(unitUnderTest.hasForeignKey(fk));
 		}
 
+		@Test
+		void passAForeignKeyWithADifferentRefColumn_ReturnsFalse() {
+			// Vorbereitung
+			unitUnderTest = TableCMO.of("BASE_TABLE");
+			ForeignKeyCMO fk0 =
+					ForeignKeyCMO
+							.of(
+									"bla",
+									ForeignKeyMemberCMO
+											.of(
+													unitUnderTest,
+													ColumnCMO
+															.of(
+																	"BASE_COLUMN",
+																	TypeCMO.of(Types.BIGINT, null, null),
+																	false,
+																	false),
+													TableCMO.of("REF_TABLE"),
+													ColumnCMO
+															.of(
+																	"BLA_COLUMN",
+																	TypeCMO.of(Types.BIGINT, null, null),
+																	false,
+																	false)));
+			unitUnderTest.addForeignKeys(fk0);
+			ForeignKeyCMO fk1 =
+					ForeignKeyCMO
+							.of(
+									"bla",
+									ForeignKeyMemberCMO
+											.of(
+													unitUnderTest,
+													ColumnCMO
+															.of(
+																	"BASE_COLUMN",
+																	TypeCMO.of(Types.BIGINT, null, null),
+																	false,
+																	false),
+													TableCMO.of("REF_TABLE"),
+													ColumnCMO
+															.of(
+																	"REF_COLUMN",
+																	TypeCMO.of(Types.BIGINT, null, null),
+																	false,
+																	false)));
+			// Ausführung & Prüfung
+			assertFalse(unitUnderTest.hasForeignKey(fk1));
+		}
+
 	}
 
 }

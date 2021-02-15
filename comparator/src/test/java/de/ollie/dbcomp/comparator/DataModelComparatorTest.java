@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
+import de.ollie.dbcomp.comparator.model.actions.AddForeignKeyCRO;
 import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
@@ -272,14 +273,51 @@ public class DataModelComparatorTest {
 															.setReferencedTableName("REF_TABLE_NAME")));
 			TypeCMO type = TypeCMO.of(Types.VARCHAR, 20, null);
 			ColumnCMO baseColumn = ColumnCMO.of("BASE_COLUMN_NAME", type, false, null);
-			TableCMO baseTable = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			TableCMO baseTableS = TableCMO.of("BASE_TABLE_NAME", baseColumn);
 			ColumnCMO refColumn = ColumnCMO.of("REF_COLUMN_NAME", type, false, null);
 			TableCMO refTable = TableCMO.of("REF_TABLE_NAME", refColumn);
-			DataModelCMO sourceModel = createModel("public", baseTable, refTable);
-			baseTable
+			DataModelCMO sourceModel = createModel("public", baseTableS, refTable);
+			TableCMO baseTableT = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			DataModelCMO targetModel = createModel("public", baseTableT, refTable);
+			baseTableS
 					.addForeignKeys(
-							ForeignKeyCMO.of("FK", ForeignKeyMemberCMO.of(baseTable, baseColumn, refTable, refColumn)));
-			DataModelCMO targetModel = createModel("public", baseTable, refTable);
+							ForeignKeyCMO
+									.of("FK", ForeignKeyMemberCMO.of(baseTableS, baseColumn, refTable, refColumn)));
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a result with a add foreign key action if a source model table has a one foreign key "
+				+ "more than the target model.")
+		@Test
+		void passSourceModelTableHasAForeignKeyMoreThanTheTargetModel_ReturnsAResultWithAAddForeignKeyAction() {
+			// Prepare
+			ComparisonResultCRO expected =
+					new ComparisonResultCRO()
+							.addChangeActions(
+									new AddForeignKeyCRO()
+											.setSchemaName("public")
+											.setTableName("BASE_TABLE_NAME")
+											.addMembers(
+													new ForeignKeyMemberCRO()
+															.setBaseColumnName("BASE_COLUMN_NAME")
+															.setBaseTableName("BASE_TABLE_NAME")
+															.setReferencedColumnName("REF_COLUMN_NAME")
+															.setReferencedTableName("REF_TABLE_NAME")));
+			TypeCMO type = TypeCMO.of(Types.VARCHAR, 20, null);
+			ColumnCMO baseColumn = ColumnCMO.of("BASE_COLUMN_NAME", type, false, null);
+			TableCMO baseTableS = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			ColumnCMO refColumn = ColumnCMO.of("REF_COLUMN_NAME", type, false, null);
+			TableCMO refTable = TableCMO.of("REF_TABLE_NAME", refColumn);
+			DataModelCMO sourceModel = createModel("public", baseTableS, refTable);
+			TableCMO baseTableT = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			DataModelCMO targetModel = createModel("public", baseTableT, refTable);
+			baseTableT
+					.addForeignKeys(
+							ForeignKeyCMO
+									.of("FK", ForeignKeyMemberCMO.of(baseTableT, baseColumn, refTable, refColumn)));
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
 			// Check

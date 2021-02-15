@@ -13,22 +13,28 @@ import lombok.experimental.Accessors;
 @Data
 public class ForeignKeyMemberCMO {
 
-	private ColumnCMO referenceeColumn;
-	private TableCMO referenceeTable;
-	private ColumnCMO referencerColumn;
-	private TableCMO referencerTable;
+	private ColumnCMO baseColumn;
+	private TableCMO baseTable;
+	private ColumnCMO referencedColumn;
+	private TableCMO referencedTable;
 
 	private ForeignKeyMemberCMO() {
 		super();
 	}
 
-	public static ForeignKeyMemberCMO of(TableCMO referenceeTable, ColumnCMO referenceeColumn, TableCMO referencerTable,
-			ColumnCMO referencerColumn) {
+	public static ForeignKeyMemberCMO of(TableCMO baseTable, ColumnCMO baseColumn, TableCMO referencedTable,
+			ColumnCMO referencedColumn) {
 		return new ForeignKeyMemberCMO()
-				.setReferenceeTable(referenceeTable)
-				.setReferenceeColumn(referenceeColumn)
-				.setReferencerTable(referencerTable)
-				.setReferencerColumn(referencerColumn);
+				.setBaseTable(baseTable)
+				.setBaseColumn(baseColumn)
+				.setReferencedTable(referencedTable)
+				.setReferencedColumn(referencedColumn);
+	}
+
+	@Override
+	public String toString() {
+		return "ForeignKeyMemberCMO(baseTable=" + baseTable.getName() + "." + baseColumn.getName() + ",referencedTable="
+				+ referencedTable.getName() + "." + referencedColumn.getName() + ")";
 	}
 
 }

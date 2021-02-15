@@ -46,7 +46,7 @@ public class TableCMO {
 	public TableCMO addForeignKeys(ForeignKeyCMO... foreignKeys) {
 		for (ForeignKeyCMO foreignKey : foreignKeys) {
 			ensure(
-					foreignKey.getMembers().stream().anyMatch(fk -> fk.getReferenceeTable() == this),
+					foreignKey.getMembers().stream().anyMatch(fk -> fk.getBaseTable() == this),
 					"fk base table must be the same table as the fk ist assgined to.");
 			this.foreignKeys.put(foreignKey.getName(), foreignKey);
 		}

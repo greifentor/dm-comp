@@ -27,8 +27,7 @@ public class ColumnCMO {
 				.setAutoIncrement(autoIncrement)
 				.setName(name)
 				.setNullable(nullable != null && !nullable ? false : true)
-				.setType(type)
-		;
+				.setType(type);
 	}
 
 }
