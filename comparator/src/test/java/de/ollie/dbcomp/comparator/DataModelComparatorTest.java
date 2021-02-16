@@ -231,6 +231,31 @@ public class DataModelComparatorTest {
 		}
 
 		@DisplayName("Returns a result with a modify data type action if a source model table has a column with a "
+				+ "different type (DATE) than the same column in the target model table.")
+		@Test
+		void passSourceModelTableAndTargetModelTableHaveAColumnWithSameNameAndDifferentTypeDate_ReturnsAResultWithAModifyDataTypeAction() {
+			// Prepare
+			ComparisonResultCRO expected =
+					new ComparisonResultCRO()
+							.addChangeActions(
+									new ModifyDataTypeCRO()
+											.setSchemaName("public")
+											.setTableName("TABLE")
+											.setColumnName("COLUMN_NAME")
+											.setNewDataType("DATE"));
+			TypeCMO typeDate = TypeCMO.of(Types.DATE, null, null);
+			TypeCMO typeBigint = TypeCMO.of(Types.BIGINT, null, null);
+			DataModelCMO sourceModel =
+					createModel("public", TableCMO.of("TABLE", ColumnCMO.of("COLUMN_NAME", typeDate, false, null)));
+			DataModelCMO targetModel =
+					createModel("public", TableCMO.of("TABLE", ColumnCMO.of("COLUMN_NAME", typeBigint, false, null)));
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a result with a modify data type action if a source model table has a column with a "
 				+ "different nullable flag than the same column in the target model table.")
 		@Test
 		void passSourceModelTableAndTargetModelTableHaveAColumnWithSameNameAndDifferentNullableFlag_ReturnsAResultWithAModifyDataTypeAction() {
@@ -279,10 +304,10 @@ public class DataModelComparatorTest {
 			DataModelCMO sourceModel = createModel("public", baseTableS, refTable);
 			TableCMO baseTableT = TableCMO.of("BASE_TABLE_NAME", baseColumn);
 			DataModelCMO targetModel = createModel("public", baseTableT, refTable);
-			baseTableS
+			baseTableT
 					.addForeignKeys(
 							ForeignKeyCMO
-									.of("FK", ForeignKeyMemberCMO.of(baseTableS, baseColumn, refTable, refColumn)));
+									.of("FK", ForeignKeyMemberCMO.of(baseTableT, baseColumn, refTable, refColumn)));
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
 			// Check
@@ -314,10 +339,10 @@ public class DataModelComparatorTest {
 			DataModelCMO sourceModel = createModel("public", baseTableS, refTable);
 			TableCMO baseTableT = TableCMO.of("BASE_TABLE_NAME", baseColumn);
 			DataModelCMO targetModel = createModel("public", baseTableT, refTable);
-			baseTableT
+			baseTableS
 					.addForeignKeys(
 							ForeignKeyCMO
-									.of("FK", ForeignKeyMemberCMO.of(baseTableT, baseColumn, refTable, refColumn)));
+									.of("FK", ForeignKeyMemberCMO.of(baseTableS, baseColumn, refTable, refColumn)));
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
 			// Check

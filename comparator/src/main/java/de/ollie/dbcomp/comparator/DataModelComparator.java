@@ -109,7 +109,7 @@ public class DataModelComparator {
 		} else if (type.getSqlType() == Types.LONGVARCHAR) {
 			return "LONGVARCHAR";
 		} else if (type.getSqlType() == Types.NUMERIC) {
-			return "NUMERIC";
+			return "NUMERIC(" + type.getLength() + ", " + type.getDecimalPlace() + ")";
 		} else if (type.getSqlType() == Types.SMALLINT) {
 			return "SMALLINT";
 		} else if (type.getSqlType() == Types.TIME) {
@@ -305,7 +305,7 @@ public class DataModelComparator {
 												.stream()
 												.map(Entry::getValue)
 												.forEach(
-														fk -> checkForForeignKeyDrop(
+														fk -> checkForForeignKeyAdd(
 																fk,
 																table.getName(),
 																schema.getName(),
@@ -313,7 +313,7 @@ public class DataModelComparator {
 																result))));
 	}
 
-	private void checkForForeignKeyDrop(ForeignKeyCMO foreignKey, String tableName, String schemaName,
+	private void checkForForeignKeyAdd(ForeignKeyCMO foreignKey, String tableName, String schemaName,
 			DataModelCMO targetModel, ComparisonResultCRO result) {
 		targetModel
 				.getSchemaByName(schemaName)
@@ -324,7 +324,7 @@ public class DataModelComparator {
 								.ifPresent(
 										table -> result
 												.addChangeActions(
-														new DropForeignKeyCRO()
+														new AddForeignKeyCRO()
 																.setSchemaName(schemaName)
 																.setTableName(tableName)
 																.addMembers(getMembers(foreignKey)))));
@@ -365,7 +365,7 @@ public class DataModelComparator {
 												.stream()
 												.map(Entry::getValue)
 												.forEach(
-														fk -> checkForForeignKeyAdd(
+														fk -> checkForForeignKeyDrop(
 																fk,
 																table.getName(),
 																schema.getName(),
@@ -373,7 +373,7 @@ public class DataModelComparator {
 																result))));
 	}
 
-	private void checkForForeignKeyAdd(ForeignKeyCMO foreignKey, String tableName, String schemaName,
+	private void checkForForeignKeyDrop(ForeignKeyCMO foreignKey, String tableName, String schemaName,
 			DataModelCMO sourceModel, ComparisonResultCRO result) {
 		sourceModel
 				.getSchemaByName(schemaName)
@@ -384,7 +384,7 @@ public class DataModelComparator {
 								.ifPresent(
 										table -> result
 												.addChangeActions(
-														new AddForeignKeyCRO()
+														new DropForeignKeyCRO()
 																.setSchemaName(schemaName)
 																.setTableName(tableName)
 																.addMembers(getMembers(foreignKey)))));
