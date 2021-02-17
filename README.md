@@ -14,3 +14,10 @@ Build with `mvn clean install`
 * *dm-comp-comparator* - contains all classes which are working on data model comparation.
 * *dm-comp-liquibase* - a model reader implementation for liquibase XML files.
 * *dm-comp-model* - contains all the model classes of the project.
+
+
+## Open Tasks
+
+* Primary keys.
+* Unique constraints.
+* Indices.
