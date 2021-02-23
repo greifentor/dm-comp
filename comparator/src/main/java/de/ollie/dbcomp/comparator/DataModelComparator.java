@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddForeignKeyCRO;
@@ -33,6 +34,8 @@ import de.ollie.dbcomp.model.TypeCMO;
  */
 public class DataModelComparator {
 
+	private static final PrimaryKeyComparator primaryKeyComparator = new PrimaryKeyComparator();
+
 	/**
 	 * Compares the two passed models and return a report of the comparison an a list of actions necessary to equalize
 	 * both models.
@@ -54,6 +57,11 @@ public class DataModelComparator {
 		addModifyChangeActions(sourceModel, targetModel, result);
 		addDropForeignKeyChangeActions(sourceModel, targetModel, result);
 		addAddForeignKeyChangeActions(sourceModel, targetModel, result);
+		result
+				.addChangeActions(
+						primaryKeyComparator
+								.compareForPrimaryKeys(targetModel, sourceModel)
+								.toArray(new ChangeActionCRO[0]));
 		return result;
 	}
 
@@ -68,7 +76,9 @@ public class DataModelComparator {
 										new CreateTableChangeActionCRO()
 												.addColumns(getColumns(tableEntry.getValue()))
 												.setSchemaName(schema.getName())
-												.setTableName(tableEntry.getKey()));
+												.setTableName(tableEntry.getKey())
+												.setPrimaryKeyMemberNames(
+														tableEntry.getValue().getPkMembers().keySet()));
 					}
 				}
 			});

@@ -45,8 +45,7 @@ public class TableCMO {
 
 	public TableCMO addForeignKeys(ForeignKeyCMO... foreignKeys) {
 		for (ForeignKeyCMO foreignKey : foreignKeys) {
-			ensure(
-					foreignKey.getMembers().stream().anyMatch(fk -> fk.getBaseTable() == this),
+			ensure(foreignKey.getMembers().stream().anyMatch(fk -> fk.getBaseTable() == this),
 					"fk base table must be the same table as the fk ist assgined to.");
 			this.foreignKeys.put(foreignKey.getName(), foreignKey);
 		}
@@ -76,6 +75,10 @@ public class TableCMO {
 
 	private boolean containsForeignKeyMember(ForeignKeyCMO fk, ForeignKeyMemberCMO fkm) {
 		return fk.getMembers().stream().anyMatch(fkm0 -> fkm0.equals(fkm));
+	}
+
+	public boolean isPrimaryKeyMember(String columnName) {
+		return pkMembers.containsKey(columnName);
 	}
 
 	public Optional<ColumnCMO> getColumnByName(String name) {

@@ -1,7 +1,9 @@
 package de.ollie.dbcomp.comparator.model.actions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import lombok.Data;
@@ -20,12 +22,17 @@ public class CreateTableChangeActionCRO implements ChangeActionCRO {
 	private List<ColumnDataCRO> columns = new ArrayList<>();
 	private String tableName;
 	private String schemaName;
+	private Set<String> primaryKeyMemberNames = new HashSet<>();
 
 	public CreateTableChangeActionCRO addColumns(ColumnDataCRO... columns) {
 		for (ColumnDataCRO column : columns) {
 			this.columns.add(column);
 		}
 		return this;
+	}
+
+	public boolean isPrimaryKeyMember(String pkMemberName) {
+		return primaryKeyMemberNames.contains(pkMemberName);
 	}
 
 }

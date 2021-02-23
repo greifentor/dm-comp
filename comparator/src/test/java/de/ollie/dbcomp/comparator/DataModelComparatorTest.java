@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.sql.Types;
+import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,10 +16,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddForeignKeyCRO;
+import de.ollie.dbcomp.comparator.model.actions.AddPrimaryKeyCRO;
 import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropForeignKeyCRO;
+import de.ollie.dbcomp.comparator.model.actions.DropPrimaryKeyCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.ForeignKeyMemberCRO;
 import de.ollie.dbcomp.comparator.model.actions.ModifyDataTypeCRO;
@@ -83,10 +86,8 @@ public class DataModelComparatorTest {
 		@Test
 		void passSourceModelWithATableMoreThanTargetModel_ReturnsAResultWithACreateTableAction() {
 			// Prepare
-			ComparisonResultCRO expected =
-					new ComparisonResultCRO()
-							.addChangeActions(
-									new CreateTableChangeActionCRO().setSchemaName("public").setTableName("TABLE"));
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(new CreateTableChangeActionCRO().setSchemaName("public").setTableName("TABLE"));
 			DataModelCMO sourceModel = createModel("public", TableCMO.of("TABLE"));
 			DataModelCMO targetModel = createModel("public");
 			// Run
@@ -100,24 +101,16 @@ public class DataModelComparatorTest {
 		@Test
 		void passSourceModelWithATableWithColumnsMoreThanTargetModel_ReturnsAResultWithOnlyACreateTableAction() {
 			// Prepare
-			ComparisonResultCRO expected =
-					new ComparisonResultCRO()
-							.addChangeActions(
-									new CreateTableChangeActionCRO()
-											.setSchemaName("public")
-											.setTableName("TABLE")
-											.addColumns(
-													new ColumnDataCRO()
-															.setName("ID")
-															.setSqlType("BIGINT")
-															.setNullable(false)));
-			DataModelCMO sourceModel =
-					createModel(
-							"public",
-							TableCMO
-									.of(
-											"TABLE",
-											ColumnCMO.of("ID", TypeCMO.of(Types.BIGINT, null, null), false, false)));
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new CreateTableChangeActionCRO()
+									.setSchemaName("public")
+									.setTableName("TABLE")
+									.addColumns(
+											new ColumnDataCRO().setName("ID").setSqlType("BIGINT").setNullable(false)));
+			DataModelCMO sourceModel = createModel(
+					"public",
+					TableCMO.of("TABLE", ColumnCMO.of("ID", TypeCMO.of(Types.BIGINT, null, null), false, false)));
 			DataModelCMO targetModel = createModel("public");
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
@@ -130,10 +123,8 @@ public class DataModelComparatorTest {
 		@Test
 		void passSourceModelWithATableLessThanTargetModel_ReturnsAResultWithADropTableAction() {
 			// Prepare
-			ComparisonResultCRO expected =
-					new ComparisonResultCRO()
-							.addChangeActions(
-									new DropTableChangeActionCRO().setSchemaName("public").setTableName("TABLE"));
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(new DropTableChangeActionCRO().setSchemaName("public").setTableName("TABLE"));
 			DataModelCMO sourceModel = createModel("public");
 			DataModelCMO targetModel = createModel("public", TableCMO.of("TABLE"));
 			// Run
@@ -147,26 +138,19 @@ public class DataModelComparatorTest {
 		@Test
 		void passSourceModelWithATableWithMoreColumnsThanTheTargetModelTable_ReturnsAResultWithAnAddColumnAction() {
 			// Prepare
-			ComparisonResultCRO expected =
-					new ComparisonResultCRO()
-							.addChangeActions(
-									new AddColumnChangeActionCRO()
-											.setSchemaName("public")
-											.setTableName("TABLE")
-											.setColumnName("COLUMN_NAME")
-											.setSqlType("BIGINT"));
-			DataModelCMO sourceModel =
-					createModel(
-							"public",
-							TableCMO
-									.of(
-											"TABLE",
-											ColumnCMO
-													.of(
-															"COLUMN_NAME",
-															TypeCMO.of(Types.BIGINT, null, null),
-															false,
-															null)));
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new AddColumnChangeActionCRO()
+									.setSchemaName("public")
+									.setTableName("TABLE")
+									.setColumnName("COLUMN_NAME")
+									.setSqlType("BIGINT"));
+			DataModelCMO sourceModel = createModel(
+					"public",
+					TableCMO
+							.of(
+									"TABLE",
+									ColumnCMO.of("COLUMN_NAME", TypeCMO.of(Types.BIGINT, null, null), false, null)));
 			DataModelCMO targetModel = createModel("public", TableCMO.of("TABLE"));
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
@@ -179,26 +163,19 @@ public class DataModelComparatorTest {
 		@Test
 		void passSourceModelWithATableWithLessColumnsThanTheTargetModelTable_ReturnsAResultWithADropColumnAction() {
 			// Prepare
-			ComparisonResultCRO expected =
-					new ComparisonResultCRO()
-							.addChangeActions(
-									new DropColumnChangeActionCRO()
-											.setSchemaName("public")
-											.setTableName("TABLE")
-											.setColumnName("COLUMN_NAME"));
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new DropColumnChangeActionCRO()
+									.setSchemaName("public")
+									.setTableName("TABLE")
+									.setColumnName("COLUMN_NAME"));
 			DataModelCMO sourceModel = createModel("public", TableCMO.of("TABLE"));
-			DataModelCMO targetModel =
-					createModel(
-							"public",
-							TableCMO
-									.of(
-											"TABLE",
-											ColumnCMO
-													.of(
-															"COLUMN_NAME",
-															TypeCMO.of(Types.BIGINT, null, null),
-															false,
-															null)));
+			DataModelCMO targetModel = createModel(
+					"public",
+					TableCMO
+							.of(
+									"TABLE",
+									ColumnCMO.of("COLUMN_NAME", TypeCMO.of(Types.BIGINT, null, null), false, null)));
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
 			// Check
@@ -210,14 +187,13 @@ public class DataModelComparatorTest {
 		@Test
 		void passSourceModelTableAndTargetModelTableHaveAColumnWithSameNameAndDifferentType_ReturnsAResultWithAModifyDataTypeAction() {
 			// Prepare
-			ComparisonResultCRO expected =
-					new ComparisonResultCRO()
-							.addChangeActions(
-									new ModifyDataTypeCRO()
-											.setSchemaName("public")
-											.setTableName("TABLE")
-											.setColumnName("COLUMN_NAME")
-											.setNewDataType("VARCHAR(20)"));
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new ModifyDataTypeCRO()
+									.setSchemaName("public")
+									.setTableName("TABLE")
+									.setColumnName("COLUMN_NAME")
+									.setNewDataType("VARCHAR(20)"));
 			TypeCMO typeVarchar = TypeCMO.of(Types.VARCHAR, 20, null);
 			TypeCMO typeBigint = TypeCMO.of(Types.BIGINT, null, null);
 			DataModelCMO sourceModel =
@@ -235,14 +211,13 @@ public class DataModelComparatorTest {
 		@Test
 		void passSourceModelTableAndTargetModelTableHaveAColumnWithSameNameAndDifferentTypeDate_ReturnsAResultWithAModifyDataTypeAction() {
 			// Prepare
-			ComparisonResultCRO expected =
-					new ComparisonResultCRO()
-							.addChangeActions(
-									new ModifyDataTypeCRO()
-											.setSchemaName("public")
-											.setTableName("TABLE")
-											.setColumnName("COLUMN_NAME")
-											.setNewDataType("DATE"));
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new ModifyDataTypeCRO()
+									.setSchemaName("public")
+									.setTableName("TABLE")
+									.setColumnName("COLUMN_NAME")
+									.setNewDataType("DATE"));
 			TypeCMO typeDate = TypeCMO.of(Types.DATE, null, null);
 			TypeCMO typeBigint = TypeCMO.of(Types.BIGINT, null, null);
 			DataModelCMO sourceModel =
@@ -260,14 +235,13 @@ public class DataModelComparatorTest {
 		@Test
 		void passSourceModelTableAndTargetModelTableHaveAColumnWithSameNameAndDifferentNullableFlag_ReturnsAResultWithAModifyDataTypeAction() {
 			// Prepare
-			ComparisonResultCRO expected =
-					new ComparisonResultCRO()
-							.addChangeActions(
-									new ModifyNullableCRO()
-											.setSchemaName("public")
-											.setTableName("TABLE")
-											.setColumnName("COLUMN_NAME")
-											.setNewNullable(true));
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new ModifyNullableCRO()
+									.setSchemaName("public")
+									.setTableName("TABLE")
+									.setColumnName("COLUMN_NAME")
+									.setNewNullable(true));
 			TypeCMO type = TypeCMO.of(Types.VARCHAR, 20, null);
 			DataModelCMO sourceModel =
 					createModel("public", TableCMO.of("TABLE", ColumnCMO.of("COLUMN_NAME", type, false, null)));
@@ -284,18 +258,17 @@ public class DataModelComparatorTest {
 		@Test
 		void passSourceModelTableHasAForeignKeyLessThanTheTargetModel_ReturnsAResultWithADropForeignKeyAction() {
 			// Prepare
-			ComparisonResultCRO expected =
-					new ComparisonResultCRO()
-							.addChangeActions(
-									new DropForeignKeyCRO()
-											.setSchemaName("public")
-											.setTableName("BASE_TABLE_NAME")
-											.addMembers(
-													new ForeignKeyMemberCRO()
-															.setBaseColumnName("BASE_COLUMN_NAME")
-															.setBaseTableName("BASE_TABLE_NAME")
-															.setReferencedColumnName("REF_COLUMN_NAME")
-															.setReferencedTableName("REF_TABLE_NAME")));
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new DropForeignKeyCRO()
+									.setSchemaName("public")
+									.setTableName("BASE_TABLE_NAME")
+									.addMembers(
+											new ForeignKeyMemberCRO()
+													.setBaseColumnName("BASE_COLUMN_NAME")
+													.setBaseTableName("BASE_TABLE_NAME")
+													.setReferencedColumnName("REF_COLUMN_NAME")
+													.setReferencedTableName("REF_TABLE_NAME")));
 			TypeCMO type = TypeCMO.of(Types.VARCHAR, 20, null);
 			ColumnCMO baseColumn = ColumnCMO.of("BASE_COLUMN_NAME", type, false, null);
 			TableCMO baseTableS = TableCMO.of("BASE_TABLE_NAME", baseColumn);
@@ -319,18 +292,17 @@ public class DataModelComparatorTest {
 		@Test
 		void passSourceModelTableHasAForeignKeyMoreThanTheTargetModel_ReturnsAResultWithAAddForeignKeyAction() {
 			// Prepare
-			ComparisonResultCRO expected =
-					new ComparisonResultCRO()
-							.addChangeActions(
-									new AddForeignKeyCRO()
-											.setSchemaName("public")
-											.setTableName("BASE_TABLE_NAME")
-											.addMembers(
-													new ForeignKeyMemberCRO()
-															.setBaseColumnName("BASE_COLUMN_NAME")
-															.setBaseTableName("BASE_TABLE_NAME")
-															.setReferencedColumnName("REF_COLUMN_NAME")
-															.setReferencedTableName("REF_TABLE_NAME")));
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new AddForeignKeyCRO()
+									.setSchemaName("public")
+									.setTableName("BASE_TABLE_NAME")
+									.addMembers(
+											new ForeignKeyMemberCRO()
+													.setBaseColumnName("BASE_COLUMN_NAME")
+													.setBaseTableName("BASE_TABLE_NAME")
+													.setReferencedColumnName("REF_COLUMN_NAME")
+													.setReferencedTableName("REF_TABLE_NAME")));
 			TypeCMO type = TypeCMO.of(Types.VARCHAR, 20, null);
 			ColumnCMO baseColumn = ColumnCMO.of("BASE_COLUMN_NAME", type, false, null);
 			TableCMO baseTableS = TableCMO.of("BASE_TABLE_NAME", baseColumn);
@@ -343,6 +315,56 @@ public class DataModelComparatorTest {
 					.addForeignKeys(
 							ForeignKeyCMO
 									.of("FK", ForeignKeyMemberCMO.of(baseTableS, baseColumn, refTable, refColumn)));
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a result with a drop primary key action if a source model table has a primary key less "
+				+ "than the target model.")
+		@Test
+		void passTargetModelTableHasAPrimaryKeyMoreThanTheSourceModel_ReturnsAResultWithADropPrimaryKeyAction() {
+			// Prepare
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new DropPrimaryKeyCRO()
+									.setSchemaName("public")
+									.setTableName("BASE_TABLE_NAME")
+									.setPkMemberNames(Set.of("BASE_COLUMN_NAME")));
+			TypeCMO type = TypeCMO.of(Types.VARCHAR, 20, null);
+			ColumnCMO baseColumn = ColumnCMO.of("BASE_COLUMN_NAME", type, false, null);
+			TableCMO baseTableS = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			ColumnCMO refColumn = ColumnCMO.of("REF_COLUMN_NAME", type, false, null);
+			TableCMO refTable = TableCMO.of("REF_TABLE_NAME", refColumn);
+			DataModelCMO sourceModel = createModel("public", baseTableS, refTable);
+			TableCMO baseTableT = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			DataModelCMO targetModel = createModel("public", baseTableT, refTable);
+			baseTableT.addPrimaryKeys("BASE_COLUMN_NAME");
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a result with a add primary key action if a source model table has a primary key but "
+				+ "the target model not.")
+		@Test
+		void passTargetModelTableHasAPrimaryKeyLessThanTheSourceModel_ReturnsAResultWithAAddPrimaryKeyAction() {
+			// Prepare
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new AddPrimaryKeyCRO()
+									.setSchemaName("public")
+									.setTableName("BASE_TABLE_NAME")
+									.setPkMemberNames(Set.of("BASE_COLUMN_NAME")));
+			TypeCMO type = TypeCMO.of(Types.VARCHAR, 20, null);
+			ColumnCMO baseColumn = ColumnCMO.of("BASE_COLUMN_NAME", type, false, null);
+			TableCMO baseTableS = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			DataModelCMO sourceModel = createModel("public", baseTableS);
+			TableCMO baseTableT = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			DataModelCMO targetModel = createModel("public", baseTableT);
+			baseTableS.addPrimaryKeys("BASE_COLUMN_NAME");
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
 			// Check
