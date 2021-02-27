@@ -263,6 +263,7 @@ public class DataModelComparatorTest {
 							new DropForeignKeyCRO()
 									.setSchemaName("public")
 									.setTableName("BASE_TABLE_NAME")
+									.setConstraintName("CONSTRAINT_NAME")
 									.addMembers(
 											new ForeignKeyMemberCRO()
 													.setBaseColumnName("BASE_COLUMN_NAME")
@@ -280,7 +281,8 @@ public class DataModelComparatorTest {
 			baseTableT
 					.addForeignKeys(
 							ForeignKeyCMO
-									.of("FK", ForeignKeyMemberCMO.of(baseTableT, baseColumn, refTable, refColumn)));
+									.of("FK", ForeignKeyMemberCMO.of(baseTableT, baseColumn, refTable, refColumn))
+									.setName("CONSTRAINT_NAME"));
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
 			// Check

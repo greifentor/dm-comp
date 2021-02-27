@@ -20,6 +20,7 @@ public class DropForeignKeyCRO implements ChangeActionCRO {
 
 	private String tableName;
 	private String schemaName;
+	private String constraintName;
 
 	private List<ForeignKeyMemberCRO> members = new ArrayList<>();
 

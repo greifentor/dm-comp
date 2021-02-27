@@ -397,6 +397,7 @@ public class DataModelComparator {
 														new DropForeignKeyCRO()
 																.setSchemaName(schemaName)
 																.setTableName(tableName)
+																.setConstraintName(foreignKey.getName())
 																.addMembers(getMembers(foreignKey)))));
 	}
 

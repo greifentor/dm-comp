@@ -6,9 +6,13 @@ import java.util.Optional;
 
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.liquibase.writer.processors.AddColumnChangeProcessor;
+import de.ollie.dbcomp.liquibase.writer.processors.AddForeignKeyChangeProcessor;
+import de.ollie.dbcomp.liquibase.writer.processors.AddPrimaryKeyChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.ChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.CreateTableChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.DropColumnChangeProcessor;
+import de.ollie.dbcomp.liquibase.writer.processors.DropForeignKeyChangeProcessor;
+import de.ollie.dbcomp.liquibase.writer.processors.DropPrimaryKeyChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.DropTableChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.ModifyDataTypeChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.ModifyNullableChangeProcessor;
@@ -23,15 +27,18 @@ import liquibase.changelog.DatabaseChangeLog;
  */
 public class ChangeActionToDatabaseChangeLogConverter {
 
-	private static final List<ChangeProcessor> CHANGE_PROCESSORS =
-			Arrays
-					.asList(
-							new AddColumnChangeProcessor(),
-							new CreateTableChangeProcessor(),
-							new DropColumnChangeProcessor(),
-							new DropTableChangeProcessor(),
-							new ModifyDataTypeChangeProcessor(),
-							new ModifyNullableChangeProcessor());
+	private static final List<ChangeProcessor> CHANGE_PROCESSORS = Arrays
+			.asList(
+					new AddColumnChangeProcessor(),
+					new AddForeignKeyChangeProcessor(),
+					new AddPrimaryKeyChangeProcessor(),
+					new CreateTableChangeProcessor(),
+					new DropColumnChangeProcessor(),
+					new DropForeignKeyChangeProcessor(),
+					new DropPrimaryKeyChangeProcessor(),
+					new DropTableChangeProcessor(),
+					new ModifyDataTypeChangeProcessor(),
+					new ModifyNullableChangeProcessor());
 
 	public DatabaseChangeLog convert(List<ChangeActionCRO> changeActions) {
 		if (changeActions == null) {
