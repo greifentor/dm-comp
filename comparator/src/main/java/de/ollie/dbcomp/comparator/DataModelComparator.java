@@ -106,6 +106,8 @@ public class DataModelComparator {
 			return "BIT";
 		} else if (type.getSqlType() == Types.BOOLEAN) {
 			return "BOOLEAN";
+		} else if (type.getSqlType() == Types.CHAR) {
+			return "CHAR(" + type.getLength() + ")";
 		} else if (type.getSqlType() == Types.DATE) {
 			return "DATE";
 		} else if (type.getSqlType() == Types.DECIMAL) {
