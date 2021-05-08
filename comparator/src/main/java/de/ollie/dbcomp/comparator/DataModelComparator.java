@@ -5,16 +5,19 @@ import static de.ollie.dbcomp.util.Check.ensure;
 import java.sql.Types;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddForeignKeyCRO;
+import de.ollie.dbcomp.comparator.model.actions.AddIndexCRO;
 import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropForeignKeyCRO;
+import de.ollie.dbcomp.comparator.model.actions.DropIndexCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.ForeignKeyMemberCRO;
 import de.ollie.dbcomp.comparator.model.actions.ModifyDataTypeCRO;
@@ -22,6 +25,7 @@ import de.ollie.dbcomp.comparator.model.actions.ModifyNullableCRO;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.ForeignKeyCMO;
+import de.ollie.dbcomp.model.IndexCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
 import de.ollie.dbcomp.model.TypeCMO;
@@ -57,6 +61,8 @@ public class DataModelComparator {
 		addModifyChangeActions(sourceModel, targetModel, result);
 		addDropForeignKeyChangeActions(sourceModel, targetModel, result);
 		addAddForeignKeyChangeActions(sourceModel, targetModel, result);
+		addAddIndexChangeActions(sourceModel, targetModel, result);
+		addDropIndexChangeActions(sourceModel, targetModel, result);
 		result
 				.addChangeActions(
 						primaryKeyComparator
@@ -401,6 +407,109 @@ public class DataModelComparator {
 																.setTableName(tableName)
 																.setConstraintName(foreignKey.getName())
 																.addMembers(getMembers(foreignKey)))));
+	}
+
+	private void addDropIndexChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		targetModel
+				.getSchemata()
+				.entrySet()
+				.stream()
+				.map(Entry::getValue)
+				.forEach(
+						schema -> schema
+								.getTables()
+								.entrySet()
+								.stream()
+								.map(Entry::getValue)
+								.filter(table -> hasTable(sourceModel, schema.getName(), table.getName()))
+								.forEach(
+										table -> table
+												.getIndices()
+												.entrySet()
+												.stream()
+												.map(Entry::getValue)
+												.forEach(
+														index -> checkForIndexDrop(
+																index,
+																table.getName(),
+																schema.getName(),
+																sourceModel,
+																result))));
+	}
+
+	private void checkForIndexDrop(IndexCMO index, String tableName, String schemaName, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		targetModel
+				.getSchemaByName(schemaName)
+				.ifPresent(
+						schema -> schema
+								.getTableByName(tableName)
+								.filter(table -> !table.hasIndex(index))
+								.ifPresent(
+										table -> result
+												.addChangeActions(
+														new DropIndexCRO()
+																.setSchemaName(schemaName)
+																.setTableName(tableName)
+																.setIndexName(index.getName()))));
+	}
+
+	private void addAddIndexChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		sourceModel
+				.getSchemata()
+				.entrySet()
+				.stream()
+				.map(Entry::getValue)
+				.forEach(
+						schema -> schema
+								.getTables()
+								.entrySet()
+								.stream()
+								.map(Entry::getValue)
+								.filter(table -> hasTable(targetModel, schema.getName(), table.getName()))
+								.forEach(
+										table -> table
+												.getIndices()
+												.entrySet()
+												.stream()
+												.map(Entry::getValue)
+												.forEach(
+														index -> checkForIndexAdd(
+																index,
+																table.getName(),
+																schema.getName(),
+																targetModel,
+																result))));
+	}
+
+	private void checkForIndexAdd(IndexCMO index, String tableName, String schemaName, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		targetModel
+				.getSchemaByName(schemaName)
+				.ifPresent(
+						schema -> schema
+								.getTableByName(tableName)
+								.filter(table -> !table.hasIndex(index))
+								.ifPresent(
+										table -> result
+												.addChangeActions(
+														new AddIndexCRO()
+																.setSchemaName(schemaName)
+																.setTableName(tableName)
+																.setIndexName(index.getName())
+																.setIndexMemberNames(
+																		getIndexMemberColumnNames(index)))));
+	}
+
+	private Set<String> getIndexMemberColumnNames(IndexCMO index) {
+		return index
+				.getMemberColumns()
+				.entrySet()
+				.stream()
+				.map(column -> column.getValue().getName())
+				.collect(Collectors.toSet());
 	}
 
 }

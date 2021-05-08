@@ -16,11 +16,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddForeignKeyCRO;
+import de.ollie.dbcomp.comparator.model.actions.AddIndexCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddPrimaryKeyCRO;
 import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropForeignKeyCRO;
+import de.ollie.dbcomp.comparator.model.actions.DropIndexCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropPrimaryKeyCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.ForeignKeyMemberCRO;
@@ -30,6 +32,7 @@ import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.DataModelCMO;
 import de.ollie.dbcomp.model.ForeignKeyCMO;
 import de.ollie.dbcomp.model.ForeignKeyMemberCMO;
+import de.ollie.dbcomp.model.IndexCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
 import de.ollie.dbcomp.model.TypeCMO;
@@ -367,6 +370,51 @@ public class DataModelComparatorTest {
 			TableCMO baseTableT = TableCMO.of("BASE_TABLE_NAME", baseColumn);
 			DataModelCMO targetModel = createModel("public", baseTableT);
 			baseTableS.addPrimaryKeys("BASE_COLUMN_NAME");
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@Test
+		void passTargetModelTableHasAnIndexLessThanTheSourceModel_ReturnsAResultWithAnAddIndexAction() {
+			// Prepare
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new AddIndexCRO()
+									.setSchemaName("public")
+									.setTableName("BASE_TABLE_NAME")
+									.setIndexName("ix_BASE_TABLE_NAME_BASE_COLUMN_NAME")
+									.setIndexMemberNames(Set.of("BASE_COLUMN_NAME")));
+			TypeCMO type = TypeCMO.of(Types.VARCHAR, 20, null);
+			ColumnCMO baseColumn = ColumnCMO.of("BASE_COLUMN_NAME", type, false, null);
+			TableCMO baseTableS = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			DataModelCMO sourceModel = createModel("public", baseTableS);
+			TableCMO baseTableT = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			DataModelCMO targetModel = createModel("public", baseTableT);
+			baseTableS.addIndex(IndexCMO.of("ix_BASE_TABLE_NAME_BASE_COLUMN_NAME", baseColumn));
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@Test
+		void passTargetModelTableHasAnIndexMoreThanTheSourceModel_ReturnsAResultWithADropIndexAction() {
+			// Prepare
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new DropIndexCRO()
+									.setSchemaName("public")
+									.setTableName("BASE_TABLE_NAME")
+									.setIndexName("ix_BASE_TABLE_NAME_BASE_COLUMN_NAME"));
+			TypeCMO type = TypeCMO.of(Types.VARCHAR, 20, null);
+			ColumnCMO baseColumn = ColumnCMO.of("BASE_COLUMN_NAME", type, false, null);
+			TableCMO baseTableS = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			DataModelCMO sourceModel = createModel("public", baseTableS);
+			TableCMO baseTableT = TableCMO.of("BASE_TABLE_NAME", baseColumn);
+			DataModelCMO targetModel = createModel("public", baseTableT);
+			baseTableT.addIndex(IndexCMO.of("ix_BASE_TABLE_NAME_BASE_COLUMN_NAME", baseColumn));
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
 			// Check

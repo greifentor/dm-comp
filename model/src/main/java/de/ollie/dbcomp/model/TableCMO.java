@@ -24,16 +24,14 @@ public class TableCMO {
 	private Map<String, ColumnCMO> columns = new HashMap<>();
 	private Map<String, ColumnCMO> pkMembers = new HashMap<>();
 	private Map<String, ForeignKeyCMO> foreignKeys = new HashMap<>();
+	private Map<String, IndexCMO> indices = new HashMap<>();
 
 	private TableCMO() {
 		super();
 	}
 
 	public static TableCMO of(String name, ColumnCMO... columns) {
-		return new TableCMO() //
-				.addColumns(columns) //
-				.setName(name) //
-		;
+		return new TableCMO().addColumns(columns).setName(name);
 	}
 
 	public TableCMO addColumns(ColumnCMO... columns) {
@@ -45,22 +43,28 @@ public class TableCMO {
 
 	public TableCMO addForeignKeys(ForeignKeyCMO... foreignKeys) {
 		for (ForeignKeyCMO foreignKey : foreignKeys) {
-			ensure(foreignKey.getMembers().stream().anyMatch(fk -> fk.getBaseTable() == this),
+			ensure(
+					foreignKey.getMembers().stream().anyMatch(fk -> fk.getBaseTable() == this),
 					"fk base table must be the same table as the fk ist assgined to.");
 			this.foreignKeys.put(foreignKey.getName(), foreignKey);
 		}
 		return this;
 	}
 
+	public TableCMO addIndex(IndexCMO... indices) {
+		for (IndexCMO index : indices) {
+			this.indices.put(index.getName(), index);
+		}
+		return this;
+	}
+
 	public TableCMO addPrimaryKeys(String... columnNames) {
 		for (String columnName : columnNames) {
-			getColumnByName(columnName.trim()) //
-					.ifPresentOrElse( //
-							column -> this.pkMembers.put(column.getName(), column), //
-							() -> {
-								throw new NoSuchElementException(
-										"column '" + columnName + "' does not exists in table: " + getName());
-							});
+			getColumnByName(columnName.trim())
+					.ifPresentOrElse(column -> this.pkMembers.put(column.getName(), column), () -> {
+						throw new NoSuchElementException(
+								"column '" + columnName + "' does not exists in table: " + getName());
+					});
 		}
 		return this;
 	}
@@ -75,6 +79,22 @@ public class TableCMO {
 
 	private boolean containsForeignKeyMember(ForeignKeyCMO fk, ForeignKeyMemberCMO fkm) {
 		return fk.getMembers().stream().anyMatch(fkm0 -> fkm0.equals(fkm));
+	}
+
+	public boolean hasIndex(IndexCMO index) {
+		return indices.entrySet().stream().anyMatch(index1 -> isEqual(index1.getValue(), index));
+	}
+
+	private boolean isEqual(IndexCMO index0, IndexCMO index1) {
+		return index0
+				.getMemberColumns()
+				.entrySet()
+				.stream()
+				.allMatch(column -> containsIndexMember(index1, column.getValue()));
+	}
+
+	private boolean containsIndexMember(IndexCMO index, ColumnCMO column) {
+		return index.getMemberColumns().entrySet().stream().anyMatch(column0 -> column0.getValue().equals(column));
 	}
 
 	public boolean isPrimaryKeyMember(String columnName) {

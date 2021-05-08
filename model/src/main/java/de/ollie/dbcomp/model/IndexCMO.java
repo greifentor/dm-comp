@@ -1,6 +1,8 @@
 package de.ollie.dbcomp.model;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -16,7 +18,26 @@ import lombok.experimental.Accessors;
 public class IndexCMO {
 
 	private String name;
-	private TableCMO table;
-	private List<ColumnCMO> memberColumns;
+	private Map<String, ColumnCMO> memberColumns = new HashMap<>();
+
+	private IndexCMO() {
+		super();
+	}
+
+	public static IndexCMO of(String name, ColumnCMO... columns) {
+		return new IndexCMO().addColumns(columns).setName(name);
+	}
+
+	public IndexCMO addColumns(ColumnCMO... columns) {
+		for (ColumnCMO column : columns) {
+			this.memberColumns.put(column.getName(), column);
+		}
+		return this;
+	}
+
+	public Optional<ColumnCMO> getColumnByName(String name) {
+		ColumnCMO column = this.memberColumns.get(name);
+		return column != null ? Optional.of(column) : Optional.empty();
+	}
 
 }
