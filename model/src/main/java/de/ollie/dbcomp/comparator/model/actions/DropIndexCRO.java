@@ -1,5 +1,8 @@
 package de.ollie.dbcomp.comparator.model.actions;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -17,5 +20,6 @@ public class DropIndexCRO implements ChangeActionCRO {
 	private String schemaName;
 
 	private String indexName;
+	private Set<String> indexMemberNames = new HashSet<>();
 
 }

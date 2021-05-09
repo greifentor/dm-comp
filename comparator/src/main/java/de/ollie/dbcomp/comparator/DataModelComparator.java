@@ -452,7 +452,9 @@ public class DataModelComparator {
 														new DropIndexCRO()
 																.setSchemaName(schemaName)
 																.setTableName(tableName)
-																.setIndexName(index.getName()))));
+																.setIndexName(index.getName())
+																.setIndexMemberNames(
+																		getIndexMemberColumnNames(index)))));
 	}
 
 	private void addAddIndexChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,

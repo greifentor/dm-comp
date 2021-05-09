@@ -407,7 +407,8 @@ public class DataModelComparatorTest {
 							new DropIndexCRO()
 									.setSchemaName("public")
 									.setTableName("BASE_TABLE_NAME")
-									.setIndexName("ix_BASE_TABLE_NAME_BASE_COLUMN_NAME"));
+									.setIndexName("ix_BASE_TABLE_NAME_BASE_COLUMN_NAME")
+									.setIndexMemberNames(Set.of("BASE_COLUMN_NAME")));
 			TypeCMO type = TypeCMO.of(Types.VARCHAR, 20, null);
 			ColumnCMO baseColumn = ColumnCMO.of("BASE_COLUMN_NAME", type, false, null);
 			TableCMO baseTableS = TableCMO.of("BASE_TABLE_NAME", baseColumn);
