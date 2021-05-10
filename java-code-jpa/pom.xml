@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>de.ollie</groupId>
 		<artifactId>dm-comp</artifactId>
-		<version>1.0.0</version>
+		<version>1.1.0</version>
 	</parent>
 
 	<artifactId>dm-comp-javacode-jpa</artifactId>
@@ -77,12 +77,12 @@
 		<dependency>
 			<groupId>de.ollie</groupId>
 			<artifactId>dm-comp-model</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>de.ollie</groupId>
 			<artifactId>java-code-parser-antlr</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0</version>
 		</dependency>
 	</dependencies>
 

@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>de.ollie</groupId>
 		<artifactId>dm-comp</artifactId>
-		<version>1.0.0</version>
+		<version>1.1.0</version>
 	</parent>
 
 	<artifactId>dm-comp-cli</artifactId>
@@ -79,22 +79,22 @@
 		<dependency>
 			<groupId>de.ollie</groupId>
 			<artifactId>dm-comp-liquibase</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>de.ollie</groupId>
 			<artifactId>dm-comp-javacode-jpa</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>de.ollie</groupId>
 			<artifactId>dm-comp-comparator</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>de.ollie</groupId>
 			<artifactId>dm-comp-model</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
