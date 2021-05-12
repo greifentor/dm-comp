@@ -53,7 +53,10 @@ public class PrimaryKeyComparator {
 
 	private Optional<TableCMO> getTableByNameForSchemaWithName(String tableName, String schemaName,
 			DataModelCMO model) {
-		return model.getSchemaByName(schemaName).map(schema -> schema.getTableByName(tableName)).orElse(null);
+		return model
+				.getSchemaByName(schemaName)
+				.map(schema -> schema.getTableByName(tableName))
+				.orElse(Optional.empty());
 	}
 
 	private void addAddForMissingKeysInSourceModel(TableCMO sourceTable, String schemaName, DataModelCMO targetModel,
