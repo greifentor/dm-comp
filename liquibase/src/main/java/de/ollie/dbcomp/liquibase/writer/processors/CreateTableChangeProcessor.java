@@ -5,6 +5,7 @@ import de.ollie.dbcomp.comparator.model.actions.ColumnDataCRO;
 import de.ollie.dbcomp.comparator.model.actions.CreateTableChangeActionCRO;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.CreateTableChange;
 
 public class CreateTableChangeProcessor implements ChangeProcessor {
@@ -20,7 +21,9 @@ public class CreateTableChangeProcessor implements ChangeProcessor {
 		CreateTableChange change = new CreateTableChange();
 		change.setSchemaName(createAction.getSchemaName());
 		change.setTableName(createAction.getTableName());
-		createAction.getColumns().forEach(column -> change.addColumn(getColumnConfig(column)));
+		createAction
+				.getColumns()
+				.forEach(column -> change.addColumn(getColumnConfig(column)));
 		return change;
 	}
 
@@ -28,6 +31,9 @@ public class CreateTableChangeProcessor implements ChangeProcessor {
 		ColumnConfig columnConfig = new ColumnConfig();
 		columnConfig.setName(column.getName());
 		columnConfig.setType(column.getSqlType());
+		if (!column.isNullable()) {
+			columnConfig.setConstraints(new ConstraintsConfig().setNullable(false));
+		}
 		return columnConfig;
 	}
 

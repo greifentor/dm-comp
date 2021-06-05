@@ -32,7 +32,9 @@ public class CLITest {
 							+ "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:pro=\"http://www.liquibase.org/xml/ns/pro\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd\">\n" //
 							+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" objectQuotingStrategy=\"LEGACY\" runOnChange=\"true\">\n" //
 							+ "        <createTable schemaName=\"\" tableName=\"AClass\">\n" //
-							+ "            <column name=\"id\" type=\"BIGINT\"/>\n" //
+							+ "            <column name=\"id\" type=\"BIGINT\">\n" //
+							+ "                <constraints nullable=\"false\"/>\n"
+							+ "            </column>\n"
 							+ "        </createTable>\n" //
 							+ "        <dropTable schemaName=\"\" tableName=\"TABLE_TO_CREATE\"/>\n" //
 							+ "        <addColumn schemaName=\"\" tableName=\"TABLE_DIFF_COLUMNS\">\n" //

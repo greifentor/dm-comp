@@ -1,18 +1,5 @@
 package de.ollie.dbcomp.comparator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.sql.Types;
-import java.util.Set;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddForeignKeyCRO;
@@ -36,6 +23,18 @@ import de.ollie.dbcomp.model.IndexCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
 import de.ollie.dbcomp.model.TypeCMO;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.sql.Types;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class DataModelComparatorTest {
@@ -48,7 +47,7 @@ public class DataModelComparatorTest {
 	}
 
 	private static DataModelCMO createModel(String schemeName, TableCMO... tables) {
-		return DataModelCMO.of(new SchemaCMO[] { SchemaCMO.of(schemeName, tables) });
+		return DataModelCMO.of(new SchemaCMO[]{SchemaCMO.of(schemeName, tables)});
 	}
 
 	@DisplayName("Tests of method 'compare(DataModelCMO, DataModelCMO)'.")
@@ -84,13 +83,16 @@ public class DataModelComparatorTest {
 			assertEquals("target model cannot be null.", thrown.getMessage());
 		}
 
-		@DisplayName("Returns a result with a create table action if the source model has a table more than the target "
+		@DisplayName("Returns a result with a create table action if the source model has a table more than the " +
+				"target "
 				+ "model.")
 		@Test
 		void passSourceModelWithATableMoreThanTargetModel_ReturnsAResultWithACreateTableAction() {
 			// Prepare
 			ComparisonResultCRO expected = new ComparisonResultCRO()
-					.addChangeActions(new CreateTableChangeActionCRO().setSchemaName("public").setTableName("TABLE"));
+					.addChangeActions(new CreateTableChangeActionCRO()
+							.setSchemaName("public")
+							.setTableName("TABLE"));
 			DataModelCMO sourceModel = createModel("public", TableCMO.of("TABLE"));
 			DataModelCMO targetModel = createModel("public");
 			// Run
@@ -110,7 +112,10 @@ public class DataModelComparatorTest {
 									.setSchemaName("public")
 									.setTableName("TABLE")
 									.addColumns(
-											new ColumnDataCRO().setName("ID").setSqlType("BIGINT").setNullable(false)));
+											new ColumnDataCRO()
+													.setName("ID")
+													.setSqlType("BIGINT")
+													.setNullable(false)));
 			DataModelCMO sourceModel = createModel(
 					"public",
 					TableCMO.of("TABLE", ColumnCMO.of("ID", TypeCMO.of(Types.BIGINT, null, null), false, false)));
@@ -127,7 +132,9 @@ public class DataModelComparatorTest {
 		void passSourceModelWithATableLessThanTargetModel_ReturnsAResultWithADropTableAction() {
 			// Prepare
 			ComparisonResultCRO expected = new ComparisonResultCRO()
-					.addChangeActions(new DropTableChangeActionCRO().setSchemaName("public").setTableName("TABLE"));
+					.addChangeActions(new DropTableChangeActionCRO()
+							.setSchemaName("public")
+							.setTableName("TABLE"));
 			DataModelCMO sourceModel = createModel("public");
 			DataModelCMO targetModel = createModel("public", TableCMO.of("TABLE"));
 			// Run
@@ -416,6 +423,36 @@ public class DataModelComparatorTest {
 			TableCMO baseTableT = TableCMO.of("BASE_TABLE_NAME", baseColumn);
 			DataModelCMO targetModel = createModel("public", baseTableT);
 			baseTableT.addIndex(IndexCMO.of("ix_BASE_TABLE_NAME_BASE_COLUMN_NAME", baseColumn));
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a result with correct table and constraint adds")
+		@Test
+		void passSourceModelWithATableMoreThanTheTargetModelTable_ReturnsAResultWithAllNecessaryAddAction() {
+			// Prepare
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new CreateTableChangeActionCRO()
+									.setSchemaName("public")
+									.setTableName("TABLE")
+									.addColumns(new ColumnDataCRO()
+											.setName("COLUMN_NAME")
+											.setNullable(true)
+											.setSqlType("VARCHAR(200)"), new ColumnDataCRO()
+											.setName("ID")
+											.setNullable(false)
+											.setSqlType("BIGINT")));
+			DataModelCMO sourceModel = createModel(
+					"public",
+					TableCMO
+							.of(
+									"TABLE",
+									ColumnCMO.of("ID", TypeCMO.of(Types.BIGINT, null, null), true, false),
+									ColumnCMO.of("COLUMN_NAME", TypeCMO.of(Types.VARCHAR, 200, null), false, null)));
+			DataModelCMO targetModel = createModel("public");
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
 			// Check
