@@ -24,3 +24,9 @@ hs_err_pid*
 /.project
 /change-log.xml
 /pom.xml.versionsBackup
+/dm-comp.iml
+/comparator/dm-comp-comparator.iml
+/java-code-jpa/dm-comp-javacode-jpa.iml
+/liquibase/dm-comp-liquibase.iml
+/model/dm-comp-model.iml
+/java-code-parser-antlr/java-code-parser-antlr.iml
