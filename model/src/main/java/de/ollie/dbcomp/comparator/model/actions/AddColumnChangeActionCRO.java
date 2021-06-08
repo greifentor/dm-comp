@@ -18,5 +18,6 @@ public class AddColumnChangeActionCRO implements ChangeActionCRO {
 
 	private String columnName;
 	private String sqlType;
+	private boolean notNull;
 
 }

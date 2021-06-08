@@ -189,6 +189,7 @@ public class DataModelComparator {
 																.addChangeActions(
 																		new AddColumnChangeActionCRO()
 																				.setColumnName(column.getName())
+																				.setNotNull(column.isNullable())
 																				.setSchemaName(schema.getName())
 																				.setSqlType(
 																						getSQLType(column.getType()))

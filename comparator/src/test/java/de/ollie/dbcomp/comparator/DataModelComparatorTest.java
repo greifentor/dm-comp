@@ -154,6 +154,7 @@ public class DataModelComparatorTest {
 									.setSchemaName("public")
 									.setTableName("TABLE")
 									.setColumnName("COLUMN_NAME")
+									.setNotNull(true)
 									.setSqlType("BIGINT"));
 			DataModelCMO sourceModel = createModel(
 					"public",

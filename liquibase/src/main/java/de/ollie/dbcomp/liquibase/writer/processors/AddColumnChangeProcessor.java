@@ -4,6 +4,7 @@ import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
+import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.AddColumnChange;
 
 public class AddColumnChangeProcessor implements ChangeProcessor {
@@ -22,6 +23,9 @@ public class AddColumnChangeProcessor implements ChangeProcessor {
 		AddColumnConfig columnConfig = new AddColumnConfig();
 		columnConfig.setName(addAction.getColumnName());
 		columnConfig.setType(addAction.getSqlType());
+		if (addAction.isNotNull()) {
+			columnConfig.setConstraints(new ConstraintsConfig().setNullable(false));
+		}
 		change.addColumn(columnConfig);
 		return change;
 	}
