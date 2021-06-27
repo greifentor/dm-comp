@@ -1,5 +1,8 @@
 package de.ollie.dbcomp.liquibase.writer.processors;
 
+import java.util.Arrays;
+import java.util.List;
+
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.ModifyDataTypeCRO;
 import liquibase.change.Change;
@@ -13,14 +16,14 @@ public class ModifyDataTypeChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public Change process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action) {
 		ModifyDataTypeCRO modifyAction = (ModifyDataTypeCRO) action;
 		ModifyDataTypeChange change = new ModifyDataTypeChange();
 		change.setSchemaName(modifyAction.getSchemaName());
 		change.setTableName(modifyAction.getTableName());
 		change.setColumnName(modifyAction.getColumnName());
 		change.setNewDataType(modifyAction.getNewDataType());
-		return change;
+		return Arrays.asList(change);
 	}
 
 }

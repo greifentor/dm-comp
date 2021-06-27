@@ -1,5 +1,8 @@
 package de.ollie.dbcomp.liquibase.writer.processors;
 
+import java.util.Arrays;
+import java.util.List;
+
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddPrimaryKeyCRO;
 import liquibase.change.Change;
@@ -16,13 +19,13 @@ public class AddPrimaryKeyChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public Change process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action) {
 		AddPrimaryKeyCRO addAction = (AddPrimaryKeyCRO) action;
 		AddPrimaryKeyChange change = new AddPrimaryKeyChange();
 		change.setSchemaName(addAction.getSchemaName());
 		change.setTableName(addAction.getTableName());
 		change.setColumnNames(addAction.getPkMemberNames().stream().reduce((cn0, cn1) -> cn0 + ", " + cn1).orElse(""));
-		return change;
+		return Arrays.asList(change);
 	}
 
 }

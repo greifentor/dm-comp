@@ -1,5 +1,8 @@
 package de.ollie.dbcomp.liquibase.writer.processors;
 
+import java.util.Arrays;
+import java.util.List;
+
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropForeignKeyCRO;
 import liquibase.change.Change;
@@ -16,7 +19,7 @@ public class DropForeignKeyChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public Change process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action) {
 		DropForeignKeyCRO dropAction = (DropForeignKeyCRO) action;
 		DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
 		dropAction.getMembers().forEach(member -> {
@@ -24,7 +27,7 @@ public class DropForeignKeyChangeProcessor implements ChangeProcessor {
 			change.setBaseTableName(member.getBaseTableName());
 			change.setConstraintName(dropAction.getConstraintName());
 		});
-		return change;
+		return Arrays.asList(change);
 	}
 
 }

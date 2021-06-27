@@ -1,5 +1,8 @@
 package de.ollie.dbcomp.liquibase.writer.processors;
 
+import java.util.Arrays;
+import java.util.List;
+
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.DropColumnChangeActionCRO;
 import liquibase.change.AddColumnConfig;
@@ -14,7 +17,7 @@ public class DropColumnChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public Change process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action) {
 		DropColumnChangeActionCRO dropAction = (DropColumnChangeActionCRO) action;
 		DropColumnChange change = new DropColumnChange();
 		change.setSchemaName(dropAction.getSchemaName());
@@ -22,7 +25,7 @@ public class DropColumnChangeProcessor implements ChangeProcessor {
 		AddColumnConfig columnConfig = new AddColumnConfig();
 		columnConfig.setName(dropAction.getColumnName());
 		change.addColumn(columnConfig);
-		return change;
+		return Arrays.asList(change);
 	}
 
 }

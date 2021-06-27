@@ -1,5 +1,8 @@
 package de.ollie.dbcomp.liquibase.writer.processors;
 
+import java.util.Arrays;
+import java.util.List;
+
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddForeignKeyCRO;
 import liquibase.change.Change;
@@ -16,7 +19,7 @@ public class AddForeignKeyChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public Change process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action) {
 		AddForeignKeyCRO addAction = (AddForeignKeyCRO) action;
 		AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
 		addAction.getMembers().forEach(member -> {
@@ -27,7 +30,7 @@ public class AddForeignKeyChangeProcessor implements ChangeProcessor {
 			change.setReferencedTableName(member.getReferencedTableName());
 			change.setReferencedColumnNames(member.getReferencedColumnName());
 		});
-		return change;
+		return Arrays.asList(change);
 	}
 
 }

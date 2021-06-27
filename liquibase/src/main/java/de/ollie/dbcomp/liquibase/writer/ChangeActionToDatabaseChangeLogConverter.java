@@ -1,5 +1,9 @@
 package de.ollie.dbcomp.liquibase.writer;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.liquibase.writer.processors.AddColumnChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.AddForeignKeyChangeProcessor;
@@ -15,10 +19,6 @@ import de.ollie.dbcomp.liquibase.writer.processors.ModifyNullableChangeProcessor
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * A converter which is able to convert change actions from the comparator to a Liquibase database change log.
@@ -49,12 +49,12 @@ public class ChangeActionToDatabaseChangeLogConverter {
 			ChangeSet changeSet =
 					new ChangeSet("ADD-CHANGE-SET-ID-HERE", "dm-comp", false, true, null, null, null, result);
 			result.addChangeSet(changeSet);
-			changeActions.forEach(action -> createChange(action).ifPresent(changeSet::addChange));
+			changeActions.forEach(action -> createChange(action).ifPresent(l -> l.forEach(changeSet::addChange)));
 		}
 		return result;
 	}
 
-	private Optional<Change> createChange(ChangeActionCRO action) {
+	private Optional<List<Change>> createChange(ChangeActionCRO action) {
 		return CHANGE_PROCESSORS
 				.stream()
 				.filter(processor -> processor.isToProcess(action))
