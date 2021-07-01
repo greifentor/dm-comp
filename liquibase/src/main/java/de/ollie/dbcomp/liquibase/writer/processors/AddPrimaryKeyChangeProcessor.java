@@ -11,7 +11,7 @@ import liquibase.change.core.AddPrimaryKeyChange;
 /**
  * @author ollie (27.02.2021)
  */
-public class AddPrimaryKeyChangeProcessor implements ChangeProcessor {
+public class AddPrimaryKeyChangeProcessor extends AbstractChangeProcessor {
 
 	@Override
 	public boolean isToProcess(ChangeActionCRO action) {
@@ -19,10 +19,10 @@ public class AddPrimaryKeyChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
 		AddPrimaryKeyCRO addAction = (AddPrimaryKeyCRO) action;
 		AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-		change.setSchemaName(addAction.getSchemaName());
+		change.setSchemaName(getSchemaName(addAction, configuration));
 		change.setTableName(addAction.getTableName());
 		change.setColumnNames(addAction.getPkMemberNames().stream().reduce((cn0, cn1) -> cn0 + ", " + cn1).orElse(""));
 		return Arrays.asList(change);

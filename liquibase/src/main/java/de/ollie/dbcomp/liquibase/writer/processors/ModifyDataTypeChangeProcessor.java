@@ -8,7 +8,7 @@ import de.ollie.dbcomp.comparator.model.actions.ModifyDataTypeCRO;
 import liquibase.change.Change;
 import liquibase.change.core.ModifyDataTypeChange;
 
-public class ModifyDataTypeChangeProcessor implements ChangeProcessor {
+public class ModifyDataTypeChangeProcessor extends AbstractChangeProcessor {
 
 	@Override
 	public boolean isToProcess(ChangeActionCRO action) {
@@ -16,10 +16,10 @@ public class ModifyDataTypeChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
 		ModifyDataTypeCRO modifyAction = (ModifyDataTypeCRO) action;
 		ModifyDataTypeChange change = new ModifyDataTypeChange();
-		change.setSchemaName(modifyAction.getSchemaName());
+		change.setSchemaName(getSchemaName(modifyAction, configuration));
 		change.setTableName(modifyAction.getTableName());
 		change.setColumnName(modifyAction.getColumnName());
 		change.setNewDataType(modifyAction.getNewDataType());

@@ -1,5 +1,7 @@
 package de.ollie.dbcomp.liquibase.writer;
 
+import static de.ollie.dbcomp.util.Check.ensure;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +11,7 @@ import de.ollie.dbcomp.liquibase.writer.processors.AddColumnChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.AddForeignKeyChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.AddPrimaryKeyChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.ChangeProcessor;
+import de.ollie.dbcomp.liquibase.writer.processors.ChangeProcessorConfiguration;
 import de.ollie.dbcomp.liquibase.writer.processors.CreateTableChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.DropColumnChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.DropForeignKeyChangeProcessor;
@@ -40,7 +43,8 @@ public class ChangeActionToDatabaseChangeLogConverter {
 					new ModifyDataTypeChangeProcessor(),
 					new ModifyNullableChangeProcessor());
 
-	public DatabaseChangeLog convert(List<ChangeActionCRO> changeActions) {
+	public DatabaseChangeLog convert(List<ChangeActionCRO> changeActions, ChangeProcessorConfiguration configuration) {
+		ensure(configuration != null, "configuration cannot be null.");
 		if (changeActions == null) {
 			return null;
 		}
@@ -49,17 +53,20 @@ public class ChangeActionToDatabaseChangeLogConverter {
 			ChangeSet changeSet =
 					new ChangeSet("ADD-CHANGE-SET-ID-HERE", "dm-comp", false, true, null, null, null, result);
 			result.addChangeSet(changeSet);
-			changeActions.forEach(action -> createChange(action).ifPresent(l -> l.forEach(changeSet::addChange)));
+			changeActions
+					.forEach(
+							action -> createChange(action, configuration)
+									.ifPresent(l -> l.forEach(changeSet::addChange)));
 		}
 		return result;
 	}
 
-	private Optional<List<Change>> createChange(ChangeActionCRO action) {
+	private Optional<List<Change>> createChange(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
 		return CHANGE_PROCESSORS
 				.stream()
 				.filter(processor -> processor.isToProcess(action))
 				.findFirst()
-				.map(processor -> processor.process(action));
+				.map(processor -> processor.process(action, configuration));
 	}
 
 }

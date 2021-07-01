@@ -9,7 +9,7 @@ import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.core.DropColumnChange;
 
-public class DropColumnChangeProcessor implements ChangeProcessor {
+public class DropColumnChangeProcessor extends AbstractChangeProcessor {
 
 	@Override
 	public boolean isToProcess(ChangeActionCRO action) {
@@ -17,10 +17,10 @@ public class DropColumnChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
 		DropColumnChangeActionCRO dropAction = (DropColumnChangeActionCRO) action;
 		DropColumnChange change = new DropColumnChange();
-		change.setSchemaName(dropAction.getSchemaName());
+		change.setSchemaName(getSchemaName(dropAction, configuration));
 		change.setTableName(dropAction.getTableName());
 		AddColumnConfig columnConfig = new AddColumnConfig();
 		columnConfig.setName(dropAction.getColumnName());

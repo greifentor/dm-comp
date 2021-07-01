@@ -3,6 +3,10 @@ package de.ollie.dbcomp.comparator;
 import static de.ollie.dbcomp.util.Check.ensure;
 
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -81,6 +85,7 @@ public class DataModelComparator {
 								.addChangeActions(
 										new CreateTableChangeActionCRO()
 												.addColumns(getColumns(tableEntry.getValue()))
+												.setForeignkeys(getForeignKeys(tableEntry.getValue()))
 												.setSchemaName(schema.getName())
 												.setTableName(tableEntry.getKey())
 												.setPrimaryKeyMemberNames(
@@ -140,6 +145,16 @@ public class DataModelComparator {
 			return "VARCHAR(" + type.getLength() + ")";
 		}
 		return "BIGINT";
+	}
+
+	private Map<String, List<ForeignKeyMemberCRO>> getForeignKeys(TableCMO tableModel) {
+		final Map<String, List<ForeignKeyMemberCRO>> map = new HashMap<>();
+		tableModel
+				.getForeignKeys()
+				.entrySet()
+				.stream()
+				.forEach(entry -> map.put(entry.getKey(), Arrays.asList(getMembers(entry.getValue()))));
+		return map;
 	}
 
 	private void addDropTableChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,

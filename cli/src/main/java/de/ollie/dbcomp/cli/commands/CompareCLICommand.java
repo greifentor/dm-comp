@@ -21,6 +21,7 @@ import de.ollie.dbcomp.javacodejpa.reader.JavaCodeFileModelReader;
 import de.ollie.dbcomp.javacodejpa.reader.converter.FieldDeclarationToColumnCMOConverter;
 import de.ollie.dbcomp.liquibase.reader.LiquibaseFileModelReader;
 import de.ollie.dbcomp.liquibase.writer.ChangeActionToDatabaseChangeLogConverter;
+import de.ollie.dbcomp.liquibase.writer.processors.ChangeProcessorConfiguration;
 import de.ollie.dbcomp.model.ReaderResult;
 import de.ollie.dbcomp.report.ImportReportMessageLevel;
 import de.ollie.dbcomp.util.TypeConverter;
@@ -119,7 +120,8 @@ public class CompareCLICommand implements CLICommand {
 		}
 		System.out.print(String.format("exporting change log to %s ... ", outputFileName));
 		exportDatabaseChangeLog(
-				new ChangeActionToDatabaseChangeLogConverter().convert(comparisonResult.getChangeActions()));
+				new ChangeActionToDatabaseChangeLogConverter()
+						.convert(comparisonResult.getChangeActions(), new ChangeProcessorConfiguration()));
 		System.out.println("done");
 		return 0;
 	}

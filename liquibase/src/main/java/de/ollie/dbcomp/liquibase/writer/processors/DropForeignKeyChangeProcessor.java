@@ -11,7 +11,7 @@ import liquibase.change.core.DropForeignKeyConstraintChange;
 /**
  * @author ollie (27.02.2021)
  */
-public class DropForeignKeyChangeProcessor implements ChangeProcessor {
+public class DropForeignKeyChangeProcessor extends AbstractChangeProcessor {
 
 	@Override
 	public boolean isToProcess(ChangeActionCRO action) {
@@ -19,11 +19,11 @@ public class DropForeignKeyChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
 		DropForeignKeyCRO dropAction = (DropForeignKeyCRO) action;
 		DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
 		dropAction.getMembers().forEach(member -> {
-			change.setBaseTableSchemaName(dropAction.getSchemaName());
+			change.setBaseTableSchemaName(getSchemaName(dropAction, configuration));
 			change.setBaseTableName(member.getBaseTableName());
 			change.setConstraintName(dropAction.getConstraintName());
 		});

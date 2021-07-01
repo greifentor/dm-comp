@@ -11,7 +11,7 @@ import liquibase.change.core.DropPrimaryKeyChange;
 /**
  * @author ollie (27.02.2021)
  */
-public class DropPrimaryKeyChangeProcessor implements ChangeProcessor {
+public class DropPrimaryKeyChangeProcessor extends AbstractChangeProcessor {
 
 	@Override
 	public boolean isToProcess(ChangeActionCRO action) {
@@ -19,10 +19,10 @@ public class DropPrimaryKeyChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
 		DropPrimaryKeyCRO dropAction = (DropPrimaryKeyCRO) action;
 		DropPrimaryKeyChange change = new DropPrimaryKeyChange();
-		change.setSchemaName(dropAction.getSchemaName());
+		change.setSchemaName(getSchemaName(dropAction, configuration));
 		change.setTableName(dropAction.getTableName());
 		return Arrays.asList(change);
 	}

@@ -2,13 +2,16 @@ package de.ollie.dbcomp.liquibase.writer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
@@ -30,6 +34,7 @@ import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.ForeignKeyMemberCRO;
 import de.ollie.dbcomp.comparator.model.actions.ModifyDataTypeCRO;
 import de.ollie.dbcomp.comparator.model.actions.ModifyNullableCRO;
+import de.ollie.dbcomp.liquibase.writer.processors.ChangeProcessorConfiguration;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import lombok.AllArgsConstructor;
@@ -52,6 +57,10 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			+ "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro "
 			+ "http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog "
 			+ "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd\">\n";
+
+	@Spy
+	private ChangeProcessorConfiguration configuration;
+
 	@InjectMocks
 	private ChangeActionToDatabaseChangeLogConverter unitUnderTest;
 
@@ -73,14 +82,20 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 
 	}
 
-	@DisplayName("Test of method 'convert(List<ChangeAction>)'.")
+	@DisplayName("Test of method 'convert(List<ChangeAction>, ChangeProcessorConfiguration)'.")
 	@Nested
-	class TestsOfMethod_convert_List_ChangeAction {
+	class TestsOfMethod_convert_List_ChangeAction_ChangeProcessorConfiguration {
+
+		@DisplayName("Returns a null value as action list if a null value is passed.")
+		@Test
+		void passNullValueAsActionList_ReturnsANullValue() {
+			assertNull(unitUnderTest.convert(null, configuration));
+		}
 
 		@DisplayName("Returns a null value if a null value is passed.")
 		@Test
-		void passNullValue_ReturnsANullValue() {
-			assertNull(unitUnderTest.convert(null));
+		void passNullValueAsConfiguration_ThrowsAnException() {
+			assertThrows(IllegalArgumentException.class, () -> unitUnderTest.convert(Arrays.asList(), null));
 		}
 
 		@DisplayName("Returns an empty DatabaseChangeLog if an empty list is passed.")
@@ -91,7 +106,7 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 					.replace("\r\n", "\n")
 					.replace("\r", "\n");
 			// Run
-			String returned = databaseChangeLogToString(unitUnderTest.convert(new ArrayList<>()))
+			String returned = databaseChangeLogToString(unitUnderTest.convert(new ArrayList<>(), configuration))
 					.replace("\r\n", "\n")
 					.replace("\r", "\n");
 			// Check
@@ -108,9 +123,12 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 					+ "objectQuotingStrategy=\"LEGACY\" runOnChange=\"true\">\n"
 					+ "        <createTable tableName=\"table1\">\n"
 					+ "            <column name=\"column\" type=\"sql type\">\n"
-					+ "                <constraints nullable=\"false\"/>\n" + "            </column>\n"
-					+ "        </createTable>\n" + "        <createTable tableName=\"table2\"/>\n"
-					+ "    </changeSet>\n" + "</databaseChangeLog>\n";
+					+ "                <constraints nullable=\"false\"/>\n"
+					+ "            </column>\n"
+					+ "        </createTable>\n"
+					+ "        <createTable tableName=\"table2\"/>\n"
+					+ "    </changeSet>\n"
+					+ "</databaseChangeLog>\n";
 			List<ChangeActionCRO> actions = Arrays
 					.asList(
 							new CreateTableChangeActionCRO()
@@ -122,8 +140,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 													.setNullable(false)),
 							new CreateTableChangeActionCRO().setTableName(TABLE_NAME + 2));
 			// Run
-			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -136,12 +155,20 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			// Prepare
 			String expected = XML_HEADER + "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" " //
 					+ "objectQuotingStrategy=\"LEGACY\" runOnChange=\"true\">\n" //
-					+ "        <createTable tableName=\"" + TABLE_NAME + "\">\n" //
-					+ "            <column name=\"" + COLUMN_NAME + "\" type=\"sql type\">\n" //
+					+ "        <createTable tableName=\""
+					+ TABLE_NAME
+					+ "\">\n" //
+					+ "            <column name=\""
+					+ COLUMN_NAME
+					+ "\" type=\"sql type\">\n" //
 					+ "                <constraints nullable=\"false\"/>\n" //
 					+ "            </column>\n" //
 					+ "        </createTable>\n" //
-					+ "        <addPrimaryKey columnNames=\"" + COLUMN_NAME + "\" tableName=\"" + TABLE_NAME + "\"/>\n" //
+					+ "        <addPrimaryKey columnNames=\""
+					+ COLUMN_NAME
+					+ "\" tableName=\""
+					+ TABLE_NAME
+					+ "\"/>\n" //
 					+ "    </changeSet>\n" //
 					+ "</databaseChangeLog>\n";
 			List<ChangeActionCRO> actions = Arrays
@@ -155,8 +182,115 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 													.setNullable(false))
 									.setPrimaryKeyMemberNames(Set.of(COLUMN_NAME)));
 			// Run
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a DatabaseChangeLog with one ChangeSet and a CreateTableChanges with a correct foreign key "
+				+ "settings.")
+		@Test
+		void passAListWithCreateTableChangeActionCROsOnly_ReturnsADatabaseChangeLogWithOneChangeSetAndCreateTableAndAddForeignKeyChange()
+				throws Exception {
+			// Prepare
+			String expected = XML_HEADER + "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" " //
+					+ "objectQuotingStrategy=\"LEGACY\" runOnChange=\"true\">\n" //
+					+ "        <createTable schemaName=\"public\" tableName=\""
+					+ TABLE_NAME
+					+ "\">\n" //
+					+ "            <column name=\""
+					+ COLUMN_NAME
+					+ "\" type=\"sql type\">\n" //
+					+ "                <constraints nullable=\"false\"/>\n" //
+					+ "            </column>\n" //
+					+ "        </createTable>\n" //
+					+ "        <addForeignKeyConstraint baseColumnNames=\"base_column\" baseTableName=\"table\" "
+					+ "baseTableSchemaName=\"public\" constraintName=\"fk_x_to_y\" "
+					+ "referencedColumnNames=\"referenced_column\" referencedTableName=\"referenced_table\" "
+					+ "referencedTableSchemaName=\"public\"/>\n" //
+					+ "    </changeSet>\n" //
+					+ "</databaseChangeLog>\n";
+			Map<String, List<ForeignKeyMemberCRO>> foreignKey = new HashMap<>();
+			foreignKey
+					.put(
+							"fk_x_to_y",
+							Arrays
+									.asList(
+											new ForeignKeyMemberCRO()
+													.setBaseColumnName("base_column")
+													.setBaseTableName("base_table")
+													.setReferencedColumnName("referenced_column")
+													.setReferencedTableName("referenced_table")));
+			List<ChangeActionCRO> actions = Arrays
+					.asList(
+							new CreateTableChangeActionCRO()
+									.setTableName(TABLE_NAME)
+									.setSchemaName("public")
+									.addColumns(
+											new ColumnDataCRO()
+													.setName(COLUMN_NAME)
+													.setSqlType(SQL_TYPE_NAME)
+													.setNullable(false))
+									.setForeignkeys(foreignKey));
+			// Run
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a DatabaseChangeLog with one ChangeSet and a CreateTableChanges with a correct foreign key "
+				+ "settings (no scheme name).")
+		@Test
+		void passAListWithCreateTableChangeActionCROsOnly_ReturnsADatabaseChangeLogWithOneChangeSetAndCreateTableAndAddForeignKeyChange_NoSchemeName()
+				throws Exception {
+			// Prepare
+			String expected = XML_HEADER + "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" " //
+					+ "objectQuotingStrategy=\"LEGACY\" runOnChange=\"true\">\n" //
+					+ "        <createTable tableName=\""
+					+ TABLE_NAME
+					+ "\">\n" //
+					+ "            <column name=\""
+					+ COLUMN_NAME
+					+ "\" type=\"sql type\">\n" //
+					+ "                <constraints nullable=\"false\"/>\n" //
+					+ "            </column>\n" //
+					+ "        </createTable>\n" //
+					+ "        <addForeignKeyConstraint baseColumnNames=\"base_column\" baseTableName=\"table\" "
+					+ "constraintName=\"fk_x_to_y\" referencedColumnNames=\"referenced_column\" "
+					+ "referencedTableName=\"referenced_table\"/>\n" //
+					+ "    </changeSet>\n" //
+					+ "</databaseChangeLog>\n";
+			Map<String, List<ForeignKeyMemberCRO>> foreignKey = new HashMap<>();
+			foreignKey
+					.put(
+							"fk_x_to_y",
+							Arrays
+									.asList(
+											new ForeignKeyMemberCRO()
+													.setBaseColumnName("base_column")
+													.setBaseTableName("base_table")
+													.setReferencedColumnName("referenced_column")
+													.setReferencedTableName("referenced_table")));
+			List<ChangeActionCRO> actions = Arrays
+					.asList(
+							new CreateTableChangeActionCRO()
+									.setTableName(TABLE_NAME)
+									.setSchemaName("public")
+									.addColumns(
+											new ColumnDataCRO()
+													.setName(COLUMN_NAME)
+													.setSqlType(SQL_TYPE_NAME)
+													.setNullable(false))
+									.setForeignkeys(foreignKey));
+			// Run
 			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+					databaseChangeLogToString(unitUnderTest.convert(actions, configuration.setSchemeNameToSet(false)))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -169,7 +303,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			// Prepare
 			String expected = XML_HEADER //
 					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
-					+ "objectQuotingStrategy=\"LEGACY\"" + " " + "runOnChange=\"true\">\n"
+					+ "objectQuotingStrategy=\"LEGACY\""
+					+ " "
+					+ "runOnChange=\"true\">\n"
 					//
 					+ "        <dropTable tableName=\"table1\"/>\n" //
 					+ "        <dropTable tableName=\"table2\"/>\n" //
@@ -181,8 +317,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 							new DropTableChangeActionCRO().setTableName(TABLE_NAME + 2) //
 					);
 			// Run
-			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -196,10 +333,13 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
 					+ "objectQuotingStrategy=\"LEGACY\" runOnChange=\"true\">\n"
 					+ "        <createTable tableName=\"table1\">\n"
-					+ "            <column name=\"column\" type=\"sql type\"/>\n" + "        </createTable>\n"
+					+ "            <column name=\"column\" type=\"sql type\"/>\n"
+					+ "        </createTable>\n"
 					+ "        <addColumn tableName=\"table2\">\n"
-					+ "            <column name=\"column1\" type=\"BIGINT\"/>\n" + "        </addColumn>\n"
-					+ "    </changeSet>\n" + "</databaseChangeLog>\n";
+					+ "            <column name=\"column1\" type=\"BIGINT\"/>\n"
+					+ "        </addColumn>\n"
+					+ "    </changeSet>\n"
+					+ "</databaseChangeLog>\n";
 			List<ChangeActionCRO> actions = Arrays
 					.asList( //
 							new CreateTableChangeActionCRO() //
@@ -211,8 +351,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 									.setSqlType("BIGINT") //
 					);
 			// Run
-			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -223,7 +364,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			// Prepare
 			String expected = XML_HEADER //
 					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
-					+ "objectQuotingStrategy=\"LEGACY\"" + " " + "runOnChange=\"true\">\n"
+					+ "objectQuotingStrategy=\"LEGACY\""
+					+ " "
+					+ "runOnChange=\"true\">\n"
 					//
 					+ "        <createTable tableName=\"table1\">\n" //
 					+ "            <column name=\"column\" type=\"sql type\"/>\n" //
@@ -243,8 +386,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 									.setColumnName(COLUMN_NAME + 1) //
 					);
 			// Run
-			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -255,7 +399,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			// Prepare
 			String expected = XML_HEADER //
 					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
-					+ "objectQuotingStrategy=\"LEGACY\"" + " " + "runOnChange=\"true\">\n"
+					+ "objectQuotingStrategy=\"LEGACY\""
+					+ " "
+					+ "runOnChange=\"true\">\n"
 					//
 					+ "        <modifyDataType columnName=\"ID\" newDataType=\"BIGINT\" schemaName=\"public\" "
 					+ "tableName=\"table\"/>\n"
@@ -271,8 +417,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 									.setNewDataType("BIGINT") //
 					);
 			// Run
-			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -284,7 +431,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			// Prepare
 			String expected = XML_HEADER //
 					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
-					+ "objectQuotingStrategy=\"LEGACY\"" + " " + "runOnChange=\"true\">\n"
+					+ "objectQuotingStrategy=\"LEGACY\""
+					+ " "
+					+ "runOnChange=\"true\">\n"
 					//
 					+ "        <dropNotNullConstraint columnName=\"ID\" schemaName=\"public\" tableName=\"table\"/>\n"
 					//
@@ -298,8 +447,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 									.setColumnName("ID")
 									.setNewNullable(true));
 			// Run
-			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -311,7 +461,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			// Prepare
 			String expected = XML_HEADER //
 					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
-					+ "objectQuotingStrategy=\"LEGACY\"" + " " + "runOnChange=\"true\">\n"
+					+ "objectQuotingStrategy=\"LEGACY\""
+					+ " "
+					+ "runOnChange=\"true\">\n"
 					//
 					+ "        <addNotNullConstraint columnName=\"ID\" schemaName=\"public\" "
 					+ "tableName=\"table\"/>\n" //
@@ -325,8 +477,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 									.setColumnName("ID")
 									.setNewNullable(false));
 			// Run
-			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -338,7 +491,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			// Prepare
 			String expected = XML_HEADER //
 					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
-					+ "objectQuotingStrategy=\"LEGACY\"" + " " + "runOnChange=\"true\">\n"
+					+ "objectQuotingStrategy=\"LEGACY\""
+					+ " "
+					+ "runOnChange=\"true\">\n"
 					//
 					+ "        <addPrimaryKey columnNames=\"ID\" schemaName=\"public\" tableName=\"table\"/>\n" //
 					+ "    </changeSet>\n" //
@@ -350,8 +505,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 									.setSchemaName("public")
 									.setPkMemberNames(Set.of("ID")));
 			// Run
-			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -363,7 +519,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			// Prepare
 			String expected = XML_HEADER //
 					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
-					+ "objectQuotingStrategy=\"LEGACY\"" + " " + "runOnChange=\"true\">\n"
+					+ "objectQuotingStrategy=\"LEGACY\""
+					+ " "
+					+ "runOnChange=\"true\">\n"
 					//
 					+ "        <dropPrimaryKey schemaName=\"public\" tableName=\"table\"/>\n" //
 					+ "    </changeSet>\n" //
@@ -371,8 +529,34 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			List<ChangeActionCRO> actions =
 					Arrays.asList(new DropPrimaryKeyCRO().setTableName(TABLE_NAME).setSchemaName("public"));
 			// Run
-			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a DatabaseChangeLog with a DropPrimaryKeyChange (no scheme names).")
+		@Test
+		void passAListWithAnDropPrimaryKeyChangeChange_ReturnsADatabaseChangeLogsWithTheCorrectChangesNoSchemNames()
+				throws Exception {
+			// Prepare
+			String expected = XML_HEADER //
+					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
+					+ "objectQuotingStrategy=\"LEGACY\""
+					+ " "
+					+ "runOnChange=\"true\">\n"
+					//
+					+ "        <dropPrimaryKey tableName=\"table\"/>\n" //
+					+ "    </changeSet>\n" //
+					+ "</databaseChangeLog>\n";
+			List<ChangeActionCRO> actions =
+					Arrays.asList(new DropPrimaryKeyCRO().setTableName(TABLE_NAME).setSchemaName("public"));
+			configuration.setSchemeNameToSet(false);
+			// Run
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}
@@ -384,7 +568,9 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			// Prepare
 			String expected = XML_HEADER //
 					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
-					+ "objectQuotingStrategy=\"LEGACY\"" + " " + "runOnChange=\"true\">\n"
+					+ "objectQuotingStrategy=\"LEGACY\""
+					+ " "
+					+ "runOnChange=\"true\">\n"
 					//
 					+ "        <addForeignKeyConstraint baseColumnNames=\"BASE_COLUMN\" baseTableName=\"BASE_TABLE\" "
 					+ "baseTableSchemaName=\"public\" referencedColumnNames=\"REF_COLUMN\" "
@@ -404,8 +590,44 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 													.setReferencedColumnName("REF_COLUMN")
 													.setReferencedTableName("REF_TABLE")));
 			// Run
-			String returned =
-					databaseChangeLogToString(unitUnderTest.convert(actions)).replace("\r\n", "\n").replace("\r", "\n");
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@DisplayName("Returns a DatabaseChangeLog with a AddForeignKeyChange (no scheme name).")
+		@Test
+		void passAListWithAnAddForeignKeyChangeChange_ReturnsADatabaseChangeLogsWithTheCorrectChangesWithNoSchemeNames()
+				throws Exception {
+			// Prepare
+			String expected = XML_HEADER //
+					+ "    <changeSet author=\"dm-comp\" id=\"ADD-CHANGE-SET-ID-HERE\" "
+					+ "objectQuotingStrategy=\"LEGACY\""
+					+ " "
+					+ "runOnChange=\"true\">\n"
+					//
+					+ "        <addForeignKeyConstraint baseColumnNames=\"BASE_COLUMN\" baseTableName=\"BASE_TABLE\" "
+					+ "referencedColumnNames=\"REF_COLUMN\" referencedTableName=\"REF_TABLE\"/>\n" //
+					+ "    </changeSet>\n" //
+					+ "</databaseChangeLog>\n";
+			List<ChangeActionCRO> actions = Arrays
+					.asList(
+							new AddForeignKeyCRO()
+									.setTableName("BASE_TABLE")
+									.setSchemaName("public")
+									.addMembers(
+											new ForeignKeyMemberCRO()
+													.setBaseColumnName("BASE_COLUMN")
+													.setBaseTableName("BASE_TABLE")
+													.setReferencedColumnName("REF_COLUMN")
+													.setReferencedTableName("REF_TABLE")));
+			configuration.setSchemeNameToSet(false);
+			// Run
+			String returned = databaseChangeLogToString(unitUnderTest.convert(actions, configuration))
+					.replace("\r\n", "\n")
+					.replace("\r", "\n");
 			// Check
 			assertEquals(expected, returned);
 		}

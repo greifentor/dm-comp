@@ -11,7 +11,7 @@ import liquibase.change.core.AddForeignKeyConstraintChange;
 /**
  * @author ollie (27.02.2021)
  */
-public class AddForeignKeyChangeProcessor implements ChangeProcessor {
+public class AddForeignKeyChangeProcessor extends AbstractChangeProcessor {
 
 	@Override
 	public boolean isToProcess(ChangeActionCRO action) {
@@ -19,14 +19,14 @@ public class AddForeignKeyChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
 		AddForeignKeyCRO addAction = (AddForeignKeyCRO) action;
 		AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
 		addAction.getMembers().forEach(member -> {
-			change.setBaseTableSchemaName(addAction.getSchemaName());
+			change.setBaseTableSchemaName(getSchemaName(addAction, configuration));
 			change.setBaseTableName(member.getBaseTableName());
 			change.setBaseColumnNames(member.getBaseColumnName());
-			change.setReferencedTableSchemaName(addAction.getSchemaName());
+			change.setReferencedTableSchemaName(getSchemaName(addAction, configuration));
 			change.setReferencedTableName(member.getReferencedTableName());
 			change.setReferencedColumnNames(member.getReferencedColumnName());
 		});

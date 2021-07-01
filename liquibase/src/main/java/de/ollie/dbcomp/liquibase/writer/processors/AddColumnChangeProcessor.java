@@ -10,7 +10,7 @@ import liquibase.change.Change;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.AddColumnChange;
 
-public class AddColumnChangeProcessor implements ChangeProcessor {
+public class AddColumnChangeProcessor extends AbstractChangeProcessor {
 
 	@Override
 	public boolean isToProcess(ChangeActionCRO action) {
@@ -18,10 +18,10 @@ public class AddColumnChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
 		AddColumnChangeActionCRO addAction = (AddColumnChangeActionCRO) action;
 		AddColumnChange change = new AddColumnChange();
-		change.setSchemaName(addAction.getSchemaName());
+		change.setSchemaName(getSchemaName(addAction, configuration));
 		change.setTableName(addAction.getTableName());
 		AddColumnConfig columnConfig = new AddColumnConfig();
 		columnConfig.setName(addAction.getColumnName());

@@ -8,7 +8,7 @@ import de.ollie.dbcomp.comparator.model.actions.DropTableChangeActionCRO;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
 
-public class DropTableChangeProcessor implements ChangeProcessor {
+public class DropTableChangeProcessor extends AbstractChangeProcessor {
 
 	@Override
 	public boolean isToProcess(ChangeActionCRO action) {
@@ -16,10 +16,10 @@ public class DropTableChangeProcessor implements ChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
 		DropTableChangeActionCRO dropAction = (DropTableChangeActionCRO) action;
 		DropTableChange change = new DropTableChange();
-		change.setSchemaName(dropAction.getSchemaName());
+		change.setSchemaName(getSchemaName(dropAction, configuration));
 		change.setTableName(dropAction.getTableName());
 		return Arrays.asList(change);
 	}
