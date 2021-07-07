@@ -156,7 +156,7 @@ public class DataModelComparatorTest {
 					TableCMO
 							.of(
 									"TABLE",
-									ColumnCMO.of("COLUMN_NAME", TypeCMO.of(Types.BIGINT, null, null), false, null)));
+									ColumnCMO.of("COLUMN_NAME", TypeCMO.of(Types.BIGINT, null, null), null, false)));
 			DataModelCMO targetModel = createModel("public", TableCMO.of("TABLE"));
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
