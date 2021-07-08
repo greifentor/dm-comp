@@ -113,6 +113,8 @@ public class DataModelComparator {
 	private String getSQLType(TypeCMO type) {
 		if (type.getSqlType() == Types.BIGINT) {
 			return "BIGINT";
+		} else if (type.getSqlType() == Types.BINARY) {
+			return "BINARY";
 		} else if (type.getSqlType() == Types.BIT) {
 			return "BIT";
 		} else if (type.getSqlType() == Types.BOOLEAN) {
