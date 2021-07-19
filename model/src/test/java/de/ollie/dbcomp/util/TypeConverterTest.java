@@ -43,6 +43,17 @@ public class TypeConverterTest {
 		}
 
 		@Test
+		void passTypesBINARY_ReturnsDBTypeBINARY() {
+			// Prepare
+			int passed = Types.BINARY;
+			DBType expected = DBType.BINARY;
+			// Run
+			DBType returned = unitUnderTest.convert(passed);
+			// Check
+			assertThat(returned, equalTo(expected));
+		}
+
+		@Test
 		void passTypesBIGINT_ReturnsDBTypeBIGINT() {
 			// Prepare
 			int passed = Types.BIGINT;
@@ -80,6 +91,17 @@ public class TypeConverterTest {
 			// Prepare
 			int passed = Types.INTEGER;
 			DBType expected = DBType.INTEGER;
+			// Run
+			DBType returned = unitUnderTest.convert(passed);
+			// Check
+			assertThat(returned, equalTo(expected));
+		}
+
+		@Test
+		void passTypesLONGVARCHAR_ReturnsDBTypeLONGVARCHAR() {
+			// Prepare
+			int passed = Types.LONGVARCHAR;
+			DBType expected = DBType.LONGVARCHAR;
 			// Run
 			DBType returned = unitUnderTest.convert(passed);
 			// Check

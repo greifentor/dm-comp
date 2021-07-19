@@ -21,6 +21,8 @@ public class TypeConverter {
 	public DBType convert(int dataType) {
 		if (dataType == Types.BIGINT) {
 			return DBType.BIGINT;
+		} else if (dataType == Types.BINARY) {
+			return DBType.BINARY;
 		} else if (dataType == Types.BIT) {
 			return DBType.BIT;
 		} else if (dataType == Types.BLOB) {
@@ -37,8 +39,8 @@ public class TypeConverter {
 			return DBType.DECIMAL;
 		} else if (dataType == Types.INTEGER) {
 			return DBType.INTEGER;
-		} else if (dataType == -1) {
-			return DBType.LONG;
+		} else if (dataType == Types.LONGVARCHAR) {
+			return DBType.LONGVARCHAR;
 		} else if (dataType == Types.NUMERIC) {
 			return DBType.NUMERIC;
 		} else if (dataType == 1111) {
