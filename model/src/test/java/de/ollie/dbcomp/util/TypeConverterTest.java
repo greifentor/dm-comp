@@ -1,7 +1,5 @@
 package de.ollie.dbcomp.util;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,92 +40,49 @@ public class TypeConverterTest {
 			assertEquals("there is no mapping for data type value: " + passed, e.getMessage());
 		}
 
-		@Test
-		void passTypesBINARY_ReturnsDBTypeBINARY() {
-			// Prepare
-			int passed = Types.BINARY;
-			DBType expected = DBType.BINARY;
-			// Run
-			DBType returned = unitUnderTest.convert(passed);
-			// Check
-			assertThat(returned, equalTo(expected));
-		}
-
-		@Test
-		void passTypesBIGINT_ReturnsDBTypeBIGINT() {
-			// Prepare
-			int passed = Types.BIGINT;
-			DBType expected = DBType.BIGINT;
-			// Run
-			DBType returned = unitUnderTest.convert(passed);
-			// Check
-			assertThat(returned, equalTo(expected));
-		}
-
-		@Test
-		void passTypesCHAR_ReturnsDBTypeCHAR() {
-			// Prepare
-			int passed = Types.CHAR;
-			DBType expected = DBType.CHAR;
-			// Run
-			DBType returned = unitUnderTest.convert(passed);
-			// Check
-			assertThat(returned, equalTo(expected));
-		}
-
-		@Test
-		void passTypesDECIMAL_ReturnsDBTypeDECIMAL() {
-			// Prepare
-			int passed = Types.DECIMAL;
-			DBType expected = DBType.DECIMAL;
-			// Run
-			DBType returned = unitUnderTest.convert(passed);
-			// Check
-			assertThat(returned, equalTo(expected));
-		}
-
-		@Test
-		void passTypesINTEGER_ReturnsDBTypeINTEGER() {
-			// Prepare
-			int passed = Types.INTEGER;
-			DBType expected = DBType.INTEGER;
-			// Run
-			DBType returned = unitUnderTest.convert(passed);
-			// Check
-			assertThat(returned, equalTo(expected));
-		}
-
-		@Test
-		void passTypesLONGVARCHAR_ReturnsDBTypeLONGVARCHAR() {
-			// Prepare
-			int passed = Types.LONGVARCHAR;
-			DBType expected = DBType.LONGVARCHAR;
-			// Run
-			DBType returned = unitUnderTest.convert(passed);
-			// Check
-			assertThat(returned, equalTo(expected));
-		}
-
-		@Test
-		void passTypesNUMERIC_ReturnsDBTypeNUMERIC() {
-			// Prepare
-			int passed = Types.NUMERIC;
-			DBType expected = DBType.NUMERIC;
-			// Run
-			DBType returned = unitUnderTest.convert(passed);
-			// Check
-			assertThat(returned, equalTo(expected));
-		}
-
-		@Test
-		void passTypesVARCHAR_ReturnsDBTypeVARCHAR() {
-			// Prepare
-			int passed = Types.VARCHAR;
-			DBType expected = DBType.VARCHAR;
-			// Run
-			DBType returned = unitUnderTest.convert(passed);
-			// Check
-			assertThat(returned, equalTo(expected));
+		@ParameterizedTest
+		@CsvSource({
+				Types.ARRAY + ",ARRAY",
+				Types.BIGINT + ",BIGINT",
+				Types.BINARY + ",BINARY",
+				Types.BIT + ",BIT",
+				Types.BLOB + ",BLOB",
+				Types.BOOLEAN + ",BOOLEAN",
+				Types.CHAR + ",CHAR",
+				Types.CLOB + ",CLOB",
+				Types.DATALINK + ",DATALINK",
+				Types.DATE + ",DATE",
+				Types.DECIMAL + ",DECIMAL",
+				Types.DISTINCT + ",DISTINCT",
+				Types.DOUBLE + ",DOUBLE",
+				Types.FLOAT + ",FLOAT",
+				Types.INTEGER + ",INTEGER",
+				Types.JAVA_OBJECT + ",JAVA_OBJECT",
+				Types.LONGNVARCHAR + ",LONGNVARCHAR",
+				Types.LONGVARBINARY + ",LONGVARBINARY",
+				Types.LONGVARCHAR + ",LONGVARCHAR",
+				Types.NCHAR + ",NCHAR",
+				Types.NCLOB + ",NCLOB",
+				Types.NULL + ",NULL",
+				Types.NUMERIC + ",NUMERIC",
+				Types.NVARCHAR + ",NVARCHAR",
+				Types.OTHER + ",OTHER",
+				Types.REAL + ",REAL",
+				Types.REF + ",REF",
+				Types.REF_CURSOR + ",REF_CURSOR",
+				Types.ROWID + ",ROWID",
+				Types.SMALLINT + ",SMALLINT",
+				Types.SQLXML + ",SQLXML",
+				Types.STRUCT + ",STRUCT",
+				Types.TIME + ",TIME",
+				Types.TIME_WITH_TIMEZONE + ",TIME_WITH_TIMEZONE",
+				Types.TIMESTAMP + ",TIMESTAMP",
+				Types.TIMESTAMP_WITH_TIMEZONE + ",TIMESTAMP_WITH_TIMEZONE",
+				Types.TINYINT + ",TINYINT",
+				Types.VARBINARY + ",VARBINARY",
+				Types.VARCHAR + ",VARCHAR" })
+		void passTypesConstant_ReturnsCorrectDBType(int passed, DBType expected) {
+			assertEquals(expected, unitUnderTest.convert(passed));
 		}
 
 	}
