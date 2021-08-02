@@ -19,7 +19,7 @@ public class AddPrimaryKeyChangeProcessor extends AbstractChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges) {
 		AddPrimaryKeyCRO addAction = (AddPrimaryKeyCRO) action;
 		AddPrimaryKeyChange change = new AddPrimaryKeyChange();
 		change.setSchemaName(getSchemaName(addAction, configuration));

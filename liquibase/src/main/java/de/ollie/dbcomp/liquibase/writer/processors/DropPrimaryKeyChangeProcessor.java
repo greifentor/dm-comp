@@ -19,7 +19,7 @@ public class DropPrimaryKeyChangeProcessor extends AbstractChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges) {
 		DropPrimaryKeyCRO dropAction = (DropPrimaryKeyCRO) action;
 		DropPrimaryKeyChange change = new DropPrimaryKeyChange();
 		change.setSchemaName(getSchemaName(dropAction, configuration));

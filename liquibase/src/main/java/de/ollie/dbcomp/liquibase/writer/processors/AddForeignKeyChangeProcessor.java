@@ -19,7 +19,7 @@ public class AddForeignKeyChangeProcessor extends AbstractChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges) {
 		AddForeignKeyCRO addAction = (AddForeignKeyCRO) action;
 		AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
 		addAction.getMembers().forEach(member -> {

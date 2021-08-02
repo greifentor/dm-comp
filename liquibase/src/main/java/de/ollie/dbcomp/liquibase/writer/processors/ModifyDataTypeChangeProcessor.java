@@ -16,7 +16,7 @@ public class ModifyDataTypeChangeProcessor extends AbstractChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges) {
 		ModifyDataTypeCRO modifyAction = (ModifyDataTypeCRO) action;
 		ModifyDataTypeChange change = new ModifyDataTypeChange();
 		change.setSchemaName(getSchemaName(modifyAction, configuration));

@@ -2,6 +2,7 @@ package de.ollie.dbcomp.liquibase.writer;
 
 import static de.ollie.dbcomp.util.Check.ensure;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -53,20 +54,22 @@ public class ChangeActionToDatabaseChangeLogConverter {
 			ChangeSet changeSet =
 					new ChangeSet("ADD-CHANGE-SET-ID-HERE", "dm-comp", false, true, null, null, null, result);
 			result.addChangeSet(changeSet);
+			List<Change> postChanges = new ArrayList<>();
 			changeActions
 					.forEach(
-							action -> createChange(action, configuration)
+							action -> createChange(action, configuration, postChanges)
 									.ifPresent(l -> l.forEach(changeSet::addChange)));
+			postChanges.forEach(changeSet::addChange);
 		}
 		return result;
 	}
 
-	private Optional<List<Change>> createChange(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
+	private Optional<List<Change>> createChange(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges) {
 		return CHANGE_PROCESSORS
 				.stream()
 				.filter(processor -> processor.isToProcess(action))
 				.findFirst()
-				.map(processor -> processor.process(action, configuration));
+				.map(processor -> processor.process(action, configuration, postChanges));
 	}
 
 }

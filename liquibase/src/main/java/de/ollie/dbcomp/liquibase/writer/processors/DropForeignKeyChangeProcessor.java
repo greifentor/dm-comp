@@ -19,7 +19,7 @@ public class DropForeignKeyChangeProcessor extends AbstractChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges) {
 		DropForeignKeyCRO dropAction = (DropForeignKeyCRO) action;
 		DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
 		dropAction.getMembers().forEach(member -> {

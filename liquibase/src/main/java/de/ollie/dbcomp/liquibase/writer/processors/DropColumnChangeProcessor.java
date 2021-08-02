@@ -17,7 +17,7 @@ public class DropColumnChangeProcessor extends AbstractChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges) {
 		DropColumnChangeActionCRO dropAction = (DropColumnChangeActionCRO) action;
 		DropColumnChange change = new DropColumnChange();
 		change.setSchemaName(getSchemaName(dropAction, configuration));

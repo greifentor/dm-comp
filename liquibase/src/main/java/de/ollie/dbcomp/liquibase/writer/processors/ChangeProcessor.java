@@ -9,6 +9,6 @@ public interface ChangeProcessor {
 
 	boolean isToProcess(ChangeActionCRO action);
 
-	List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration);
+	List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges);
 
 }

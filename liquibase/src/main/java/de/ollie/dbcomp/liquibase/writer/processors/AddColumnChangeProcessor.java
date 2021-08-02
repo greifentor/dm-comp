@@ -18,7 +18,7 @@ public class AddColumnChangeProcessor extends AbstractChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges) {
 		AddColumnChangeActionCRO addAction = (AddColumnChangeActionCRO) action;
 		AddColumnChange change = new AddColumnChange();
 		change.setSchemaName(getSchemaName(addAction, configuration));

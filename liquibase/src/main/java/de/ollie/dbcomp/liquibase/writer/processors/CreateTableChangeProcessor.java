@@ -22,7 +22,7 @@ public class CreateTableChangeProcessor extends AbstractChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges) {
 		CreateTableChangeActionCRO createAction = (CreateTableChangeActionCRO) action;
 		CreateTableChange change = new CreateTableChange();
 		List<Change> changes = new ArrayList<>();
@@ -54,7 +54,7 @@ public class CreateTableChangeProcessor extends AbstractChangeProcessor {
 					addFKChange.setReferencedTableSchemaName(getSchemaName(createAction, configuration));
 					addFKChange.setReferencedTableName(member.getReferencedTableName());
 					addFKChange.setReferencedColumnNames(member.getReferencedColumnName());
-					changes.add(addFKChange);
+					postChanges.add(addFKChange);
 				}
 			}
 		}

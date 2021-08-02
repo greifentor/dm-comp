@@ -17,7 +17,7 @@ public class ModifyNullableChangeProcessor extends AbstractChangeProcessor {
 	}
 
 	@Override
-	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration) {
+	public List<Change> process(ChangeActionCRO action, ChangeProcessorConfiguration configuration, List<Change> postChanges) {
 		ModifyNullableCRO modifyAction = (ModifyNullableCRO) action;
 		if (modifyAction.isNewNullable()) {
 			DropNotNullConstraintChange change = new DropNotNullConstraintChange();
