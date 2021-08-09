@@ -1,19 +1,7 @@
 package de.ollie.dbcomp.comparator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.sql.Types;
-import java.util.Set;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
+import de.ollie.dbcomp.comparator.model.actions.AddAutoIncrementChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddForeignKeyCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddIndexCRO;
@@ -36,6 +24,18 @@ import de.ollie.dbcomp.model.IndexCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
 import de.ollie.dbcomp.model.TypeCMO;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.sql.Types;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class DataModelComparatorTest {
@@ -48,7 +48,7 @@ public class DataModelComparatorTest {
 	}
 
 	private static DataModelCMO createModel(String schemeName, TableCMO... tables) {
-		return DataModelCMO.of(new SchemaCMO[] { SchemaCMO.of(schemeName, tables) });
+		return DataModelCMO.of(new SchemaCMO[]{SchemaCMO.of(schemeName, tables)});
 	}
 
 	@DisplayName("Tests of method 'compare(DataModelCMO, DataModelCMO)'.")
@@ -92,6 +92,32 @@ public class DataModelComparatorTest {
 			ComparisonResultCRO expected = new ComparisonResultCRO()
 					.addChangeActions(new CreateTableChangeActionCRO().setSchemaName("public").setTableName("TABLE"));
 			DataModelCMO sourceModel = createModel("public", TableCMO.of("TABLE"));
+			DataModelCMO targetModel = createModel("public");
+			// Run
+			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
+			// Check
+			assertEquals(expected, returned);
+		}
+
+		@Test
+		void passSourceModelWithATableMoreThanTargetModelAndAnAutoIncrement_ReturnsAResultWithACreateTableActionAndAnAddAutoIncrementAction() {
+			// Prepare
+			ComparisonResultCRO expected = new ComparisonResultCRO()
+					.addChangeActions(
+							new CreateTableChangeActionCRO().setSchemaName("public").setTableName("TABLE")
+							                                .addColumns(
+									                                new ColumnDataCRO()
+											                                .setName("ID")
+											                                .setSqlType("BIGINT")
+											                                .setNullable(false)),
+							new AddAutoIncrementChangeActionCRO()
+									.setSchemaName("public")
+									.setTableName("TABLE")
+									.setColumnName("ID")
+									.setStartValue(1));
+			TableCMO sourceTable =
+					TableCMO.of("TABLE", ColumnCMO.of("ID", TypeCMO.of(Types.BIGINT, null, null), true, false));
+			DataModelCMO sourceModel = createModel("public", sourceTable);
 			DataModelCMO targetModel = createModel("public");
 			// Run
 			ComparisonResultCRO returned = unitUnderTest.compare(sourceModel, targetModel);
@@ -439,7 +465,12 @@ public class DataModelComparatorTest {
 													.setName("COLUMN_NAME")
 													.setNullable(true)
 													.setSqlType("VARCHAR(200)"),
-											new ColumnDataCRO().setName("ID").setNullable(false).setSqlType("BIGINT")));
+											new ColumnDataCRO().setName("ID").setNullable(false).setSqlType("BIGINT")),
+							new AddAutoIncrementChangeActionCRO()
+									.setColumnName("ID")
+									.setSchemaName("public")
+									.setStartValue(1)
+									.setTableName("TABLE"));
 			DataModelCMO sourceModel = createModel(
 					"public",
 					TableCMO

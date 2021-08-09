@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
+import de.ollie.dbcomp.liquibase.writer.processors.AddAutoIncrementChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.AddColumnChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.AddForeignKeyChangeProcessor;
 import de.ollie.dbcomp.liquibase.writer.processors.AddPrimaryKeyChangeProcessor;
@@ -37,6 +38,7 @@ public class ChangeActionToDatabaseChangeLogConverter {
 					new AddForeignKeyChangeProcessor(),
 					new AddPrimaryKeyChangeProcessor(),
 					new CreateTableChangeProcessor(),
+					new AddAutoIncrementChangeProcessor(),
 					new DropColumnChangeProcessor(),
 					new DropForeignKeyChangeProcessor(),
 					new DropPrimaryKeyChangeProcessor(),

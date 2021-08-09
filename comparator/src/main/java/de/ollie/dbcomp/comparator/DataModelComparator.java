@@ -1,17 +1,5 @@
 package de.ollie.dbcomp.comparator;
 
-import static de.ollie.dbcomp.util.Check.ensure;
-
-import java.sql.Types;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
@@ -34,31 +22,44 @@ import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
 import de.ollie.dbcomp.model.TypeCMO;
 
+import java.sql.Types;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static de.ollie.dbcomp.util.Check.ensure;
+
 /**
  * Compares two data models and returns a report about the comparison and a list of actions to equalize both models.
  *
  * @author ollie (27.11.2020)
- *
  */
 public class DataModelComparator {
 
+	private static final AutoIncrementHelper autoIncrementHelper = new AutoIncrementHelper();
 	private static final PrimaryKeyComparator primaryKeyComparator = new PrimaryKeyComparator();
 
 	/**
 	 * Compares the two passed models and return a report of the comparison an a list of actions necessary to equalize
 	 * both models.
-	 * 
+	 *
 	 * @param sourceModel The model which the is to change to the target models structure.
 	 * @param targetModel The model which the source model would be changed to if all the returned actions are executed
 	 *                    onto.
 	 * @return A report and a list of actions which are necessary to change the source model to the target models
-	 *         structure.
+	 * structure.
 	 */
 	public ComparisonResultCRO compare(DataModelCMO sourceModel, DataModelCMO targetModel) {
 		ensure(sourceModel != null, "source model cannot be null.");
 		ensure(targetModel != null, "target model cannot be null.");
 		ComparisonResultCRO result = new ComparisonResultCRO();
 		addCreateTableChangeActions(sourceModel, targetModel, result);
+		addAddAutoIncrementChangeActions(sourceModel, targetModel, result);
 		addDropTableChangeActions(sourceModel, targetModel, result);
 		addAddColumnChangeActions(sourceModel, targetModel, result);
 		addDropColumnChangeActions(sourceModel, targetModel, result);
@@ -76,11 +77,12 @@ public class DataModelComparator {
 	}
 
 	private void addCreateTableChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                                         ComparisonResultCRO result) {
 		for (Entry<String, SchemaCMO> schemaEntry : sourceModel.getSchemata().entrySet()) {
 			targetModel.getSchemaByName(schemaEntry.getKey()).ifPresent(schema -> {
 				for (Entry<String, TableCMO> tableEntry : schemaEntry.getValue().getTables().entrySet()) {
 					if (schema.getTableByName(tableEntry.getKey()).isEmpty()) {
+						final TableCMO table = tableEntry.getValue();
 						result
 								.addChangeActions(
 										new CreateTableChangeActionCRO()
@@ -90,6 +92,9 @@ public class DataModelComparator {
 												.setTableName(tableEntry.getKey())
 												.setPrimaryKeyMemberNames(
 														tableEntry.getValue().getPkMembers().keySet()));
+						result.addChangeActions(autoIncrementHelper.getNecessaryAddAutoIncrementChangeActionsForCreateTable(
+								table,
+								schema.getName()));
 					}
 				}
 			});
@@ -159,8 +164,13 @@ public class DataModelComparator {
 		return map;
 	}
 
+	private void addAddAutoIncrementChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
+	                                              ComparisonResultCRO result) {
+
+	}
+
 	private void addDropTableChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                                       ComparisonResultCRO result) {
 		for (Entry<String, SchemaCMO> schemaEntry : targetModel.getSchemata().entrySet()) {
 			sourceModel.getSchemaByName(schemaEntry.getKey()).ifPresent(schema -> {
 				for (Entry<String, TableCMO> tableEntry : schemaEntry.getValue().getTables().entrySet()) {
@@ -177,7 +187,7 @@ public class DataModelComparator {
 	}
 
 	private void addAddColumnChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                                       ComparisonResultCRO result) {
 		sourceModel
 				.getSchemata()
 				.entrySet()
@@ -229,7 +239,7 @@ public class DataModelComparator {
 	}
 
 	private void addDropColumnChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                                        ComparisonResultCRO result) {
 		targetModel
 				.getSchemata()
 				.entrySet()
@@ -265,7 +275,7 @@ public class DataModelComparator {
 	}
 
 	private void addModifyChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                                    ComparisonResultCRO result) {
 		sourceModel
 				.getSchemata()
 				.entrySet()
@@ -296,7 +306,7 @@ public class DataModelComparator {
 	}
 
 	private void checkForColumn(DataModelCMO model, String schemaName, String tableName, String columnName,
-			TypeCMO type, boolean nullable, ComparisonResultCRO result) {
+	                            TypeCMO type, boolean nullable, ComparisonResultCRO result) {
 		getColumn(model, schemaName, tableName, columnName)
 				.filter(column -> !column.getType().equals(type) || (column.isNullable() != nullable))
 				.ifPresent(column -> {
@@ -321,7 +331,7 @@ public class DataModelComparator {
 	}
 
 	private void addDropForeignKeyChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                                            ComparisonResultCRO result) {
 		sourceModel
 				.getSchemata()
 				.entrySet()
@@ -350,7 +360,7 @@ public class DataModelComparator {
 	}
 
 	private void checkForForeignKeyAdd(ForeignKeyCMO foreignKey, String tableName, String schemaName,
-			DataModelCMO targetModel, ComparisonResultCRO result) {
+	                                   DataModelCMO targetModel, ComparisonResultCRO result) {
 		targetModel
 				.getSchemaByName(schemaName)
 				.ifPresent(
@@ -381,7 +391,7 @@ public class DataModelComparator {
 	}
 
 	private void addAddForeignKeyChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                                           ComparisonResultCRO result) {
 		targetModel
 				.getSchemata()
 				.entrySet()
@@ -410,7 +420,7 @@ public class DataModelComparator {
 	}
 
 	private void checkForForeignKeyDrop(ForeignKeyCMO foreignKey, String tableName, String schemaName,
-			DataModelCMO sourceModel, ComparisonResultCRO result) {
+	                                    DataModelCMO sourceModel, ComparisonResultCRO result) {
 		sourceModel
 				.getSchemaByName(schemaName)
 				.ifPresent(
@@ -428,7 +438,7 @@ public class DataModelComparator {
 	}
 
 	private void addDropIndexChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                                       ComparisonResultCRO result) {
 		targetModel
 				.getSchemata()
 				.entrySet()
@@ -457,7 +467,7 @@ public class DataModelComparator {
 	}
 
 	private void checkForIndexDrop(IndexCMO index, String tableName, String schemaName, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                               ComparisonResultCRO result) {
 		targetModel
 				.getSchemaByName(schemaName)
 				.ifPresent(
@@ -476,7 +486,7 @@ public class DataModelComparator {
 	}
 
 	private void addAddIndexChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                                      ComparisonResultCRO result) {
 		sourceModel
 				.getSchemata()
 				.entrySet()
@@ -505,7 +515,7 @@ public class DataModelComparator {
 	}
 
 	private void checkForIndexAdd(IndexCMO index, String tableName, String schemaName, DataModelCMO targetModel,
-			ComparisonResultCRO result) {
+	                              ComparisonResultCRO result) {
 		targetModel
 				.getSchemaByName(schemaName)
 				.ifPresent(
