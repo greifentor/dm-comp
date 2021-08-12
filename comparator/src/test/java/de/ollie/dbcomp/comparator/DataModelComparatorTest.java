@@ -114,6 +114,7 @@ public class DataModelComparatorTest {
 									.setSchemaName("public")
 									.setTableName("TABLE")
 									.setColumnName("ID")
+									.setDataType("BIGINT")
 									.setStartValue(1));
 			TableCMO sourceTable =
 					TableCMO.of("TABLE", ColumnCMO.of("ID", TypeCMO.of(Types.BIGINT, null, null), true, false));
@@ -468,6 +469,7 @@ public class DataModelComparatorTest {
 											new ColumnDataCRO().setName("ID").setNullable(false).setSqlType("BIGINT")),
 							new AddAutoIncrementChangeActionCRO()
 									.setColumnName("ID")
+									.setDataType("BIGINT")
 									.setSchemaName("public")
 									.setStartValue(1)
 									.setTableName("TABLE"));

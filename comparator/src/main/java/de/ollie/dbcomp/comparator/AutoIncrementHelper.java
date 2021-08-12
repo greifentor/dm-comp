@@ -3,6 +3,7 @@ package de.ollie.dbcomp.comparator;
 import de.ollie.dbcomp.comparator.model.actions.AddAutoIncrementChangeActionCRO;
 import de.ollie.dbcomp.model.ColumnCMO;
 import de.ollie.dbcomp.model.TableCMO;
+import de.ollie.dbcomp.util.TypeConverter;
 
 import java.util.List;
 import java.util.Map.Entry;
@@ -11,6 +12,8 @@ import java.util.stream.Collectors;
 import static de.ollie.dbcomp.util.Check.ensure;
 
 public class AutoIncrementHelper {
+
+	private static final TypeConverter typeConverter = new TypeConverter();
 
 	public AddAutoIncrementChangeActionCRO[] getNecessaryAddAutoIncrementChangeActionsForCreateTable(TableCMO table,
 	                                                                                                 String schemaName) {
@@ -22,7 +25,8 @@ public class AutoIncrementHelper {
 								.setColumnName(column.getName())
 								.setTableName(table.getName())
 								.setSchemaName(schemaName)
-								.setStartValue(1))
+								.setStartValue(1)
+								.setDataType(typeConverter.getSQLType(column.getType(), false)))
 						.collect(Collectors.toList())
 						.toArray(new AddAutoIncrementChangeActionCRO[0]);
 	}

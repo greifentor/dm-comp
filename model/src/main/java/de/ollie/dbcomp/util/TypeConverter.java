@@ -1,5 +1,7 @@
 package de.ollie.dbcomp.util;
 
+import de.ollie.dbcomp.model.TypeCMO;
+
 import java.sql.Types;
 import java.util.Set;
 
@@ -113,4 +115,60 @@ public class TypeConverter {
 	public boolean isSimpleType(String typeName) {
 		return (typeName != null) && JAVA_SIMPLE_TYPE_NAMES.contains(typeName);
 	}
+
+	/**
+	 * Returns a string for the passed type object.
+	 *
+	 * @param type The type object whose string repesentation is to return.
+	 * @return The string for the passed type object.
+	 */
+	public String getSQLType(TypeCMO type) {
+		return getSQLType(type, true);
+	}
+		/**
+		 * Returns a string for the passed type object.
+		 *
+		 * @param type The type object whose string repesentation is to return.
+		 * @param showLengthAndPrecision Set this flag to show length and precision in the type name.
+		 * @return The string for the passed type object.
+		 */
+		public String getSQLType(TypeCMO type, boolean showLengthAndPrecision) {
+		if (type.getSqlType() == Types.BIGINT) {
+			return "BIGINT";
+		} else if (type.getSqlType() == Types.BINARY) {
+			return "BINARY";
+		} else if (type.getSqlType() == Types.BIT) {
+			return "BIT";
+		} else if (type.getSqlType() == Types.BOOLEAN) {
+			return "BOOLEAN";
+		} else if (type.getSqlType() == Types.CHAR) {
+			return "CHAR" + (showLengthAndPrecision ? "(" + type.getLength() + ")" : "");
+		} else if (type.getSqlType() == Types.DATE) {
+			return "DATE";
+		} else if (type.getSqlType() == Types.DECIMAL) {
+			return "DECIMAL" + (showLengthAndPrecision ? "(" + type.getLength() + ", " + type.getDecimalPlace() + ")" : "");
+		} else if (type.getSqlType() == Types.DOUBLE) {
+			return "DOUBLE";
+		} else if (type.getSqlType() == Types.FLOAT) {
+			return "FLOAT";
+		} else if (type.getSqlType() == Types.INTEGER) {
+			return "INTEGER";
+		} else if (type.getSqlType() == Types.LONGVARCHAR) {
+			return "LONGVARCHAR";
+		} else if (type.getSqlType() == Types.NUMERIC) {
+			return "NUMERIC" + (showLengthAndPrecision ? "(" + type.getLength() + ", " + type.getDecimalPlace() + ")" : "");
+		} else if (type.getSqlType() == Types.SMALLINT) {
+			return "SMALLINT";
+		} else if (type.getSqlType() == Types.TIME) {
+			return "TIME";
+		} else if (type.getSqlType() == Types.TIMESTAMP) {
+			return "TIMESTAMP";
+		} else if (type.getSqlType() == Types.TINYINT) {
+			return "TINYINT";
+		} else if (type.getSqlType() == Types.VARCHAR) {
+			return "VARCHAR" + (showLengthAndPrecision ? "(" + type.getLength() + ")" : "");
+		}
+		return "BIGINT";
+	}
+
 }

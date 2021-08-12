@@ -26,6 +26,7 @@ public class AddAutoIncrementChangeProcessor extends AbstractChangeProcessor {
 		AddAutoIncrementChangeActionCRO addAction = (AddAutoIncrementChangeActionCRO) action;
 		AddAutoIncrementChange change = new AddAutoIncrementChange();
 		change.setColumnName(addAction.getColumnName());
+		change.setColumnDataType(addAction.getDataType());
 		change.setSchemaName(getSchemaName(addAction, configuration));
 		change.setTableName(addAction.getTableName());
 		change.setStartWith(BigInteger.ONE);

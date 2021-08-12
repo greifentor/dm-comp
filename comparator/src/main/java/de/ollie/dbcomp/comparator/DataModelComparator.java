@@ -21,6 +21,7 @@ import de.ollie.dbcomp.model.IndexCMO;
 import de.ollie.dbcomp.model.SchemaCMO;
 import de.ollie.dbcomp.model.TableCMO;
 import de.ollie.dbcomp.model.TypeCMO;
+import de.ollie.dbcomp.util.TypeConverter;
 
 import java.sql.Types;
 import java.util.Arrays;
@@ -43,6 +44,7 @@ public class DataModelComparator {
 
 	private static final AutoIncrementHelper autoIncrementHelper = new AutoIncrementHelper();
 	private static final PrimaryKeyComparator primaryKeyComparator = new PrimaryKeyComparator();
+	private static final TypeConverter typeConverter = new TypeConverter();
 
 	/**
 	 * Compares the two passed models and return a report of the comparison an a list of actions necessary to equalize
@@ -109,49 +111,10 @@ public class DataModelComparator {
 				.map(
 						entry -> new ColumnDataCRO()
 								.setName(entry.getValue().getName())
-								.setSqlType(getSQLType(entry.getValue().getType()))
+								.setSqlType(typeConverter.getSQLType(entry.getValue().getType()))
 								.setNullable(entry.getValue().isNullable()))
 				.collect(Collectors.toList())
 				.toArray(new ColumnDataCRO[table.getColumns().size()]);
-	}
-
-	private String getSQLType(TypeCMO type) {
-		if (type.getSqlType() == Types.BIGINT) {
-			return "BIGINT";
-		} else if (type.getSqlType() == Types.BINARY) {
-			return "BINARY";
-		} else if (type.getSqlType() == Types.BIT) {
-			return "BIT";
-		} else if (type.getSqlType() == Types.BOOLEAN) {
-			return "BOOLEAN";
-		} else if (type.getSqlType() == Types.CHAR) {
-			return "CHAR(" + type.getLength() + ")";
-		} else if (type.getSqlType() == Types.DATE) {
-			return "DATE";
-		} else if (type.getSqlType() == Types.DECIMAL) {
-			return "DECIMAL(" + type.getLength() + ", " + type.getDecimalPlace() + ")";
-		} else if (type.getSqlType() == Types.DOUBLE) {
-			return "DOUBLE";
-		} else if (type.getSqlType() == Types.FLOAT) {
-			return "FLOAT";
-		} else if (type.getSqlType() == Types.INTEGER) {
-			return "INTEGER";
-		} else if (type.getSqlType() == Types.LONGVARCHAR) {
-			return "LONGVARCHAR";
-		} else if (type.getSqlType() == Types.NUMERIC) {
-			return "NUMERIC(" + type.getLength() + ", " + type.getDecimalPlace() + ")";
-		} else if (type.getSqlType() == Types.SMALLINT) {
-			return "SMALLINT";
-		} else if (type.getSqlType() == Types.TIME) {
-			return "TIME";
-		} else if (type.getSqlType() == Types.TIMESTAMP) {
-			return "TIMESTAMP";
-		} else if (type.getSqlType() == Types.TINYINT) {
-			return "TINYINT";
-		} else if (type.getSqlType() == Types.VARCHAR) {
-			return "VARCHAR(" + type.getLength() + ")";
-		}
-		return "BIGINT";
 	}
 
 	private Map<String, List<ForeignKeyMemberCRO>> getForeignKeys(TableCMO tableModel) {
@@ -219,7 +182,7 @@ public class DataModelComparator {
 																				.setNotNull(!column.isNullable())
 																				.setSchemaName(schema.getName())
 																				.setSqlType(
-																						getSQLType(column.getType()))
+																						typeConverter.getSQLType(column.getType()))
 																				.setTableName(table.getName()));
 													}
 												})));
@@ -315,7 +278,7 @@ public class DataModelComparator {
 								.addChangeActions(
 										new ModifyDataTypeCRO()
 												.setColumnName(columnName)
-												.setNewDataType(getSQLType(type))
+												.setNewDataType(typeConverter.getSQLType(type))
 												.setSchemaName(schemaName)
 												.setTableName(tableName));
 					} else if (column.isNullable() != nullable) {

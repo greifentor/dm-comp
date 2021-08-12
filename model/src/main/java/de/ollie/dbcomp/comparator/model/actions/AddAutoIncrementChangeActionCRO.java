@@ -17,6 +17,7 @@ public class AddAutoIncrementChangeActionCRO implements ChangeActionCRO {
 	private String tableName;
 	private String schemaName;
 	private String columnName;
+	private String dataType;
 	private long startValue;
 
 }

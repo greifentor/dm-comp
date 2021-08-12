@@ -64,6 +64,7 @@ class AutoIncrementHelperTest {
 			// Prepare
 			AddAutoIncrementChangeActionCRO[] expected = new AddAutoIncrementChangeActionCRO[]{
 					new AddAutoIncrementChangeActionCRO()
+							.setDataType("VARCHAR")
 							.setColumnName(COLUMN_NAME)
 							.setSchemaName(SCHEMA_NAME)
 							.setStartValue(1).setTableName(TABLE_NAME)
