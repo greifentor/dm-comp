@@ -64,6 +64,8 @@ public class DataModelComparator {
 		ensure(sourceModel != null, "source model cannot be null.");
 		ensure(targetModel != null, "target model cannot be null.");
 		LOG.debug("starting datamodel comparison ...");
+		LOG.debug("sourceModel={}", sourceModel);
+		LOG.debug("targetModel={}", targetModel);
 		ComparisonResultCRO result = new ComparisonResultCRO();
 		addCreateTableChangeActions(sourceModel, targetModel, result);
 		addAddAutoIncrementChangeActions(sourceModel, targetModel, result);
@@ -413,6 +415,7 @@ public class DataModelComparator {
 
 	private void addDropIndexChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
 			ComparisonResultCRO result) {
+		LOG.debug("checking for indices to drop");
 		targetModel
 				.getSchemata()
 				.entrySet()
@@ -453,7 +456,7 @@ public class DataModelComparator {
 
 	private void addDropIndexCROToResult(ComparisonResultCRO result, TableCMO table, IndexCMO index,
 			String schemaName) {
-		LOG.debug("drop index CRO for table '" + table.getName() + "' and index '" + index.getName() + "'");
+		LOG.debug("drop index CRO for table '{}' and index '{}'", table.getName(), index.getName());
 		result
 				.addChangeActions(
 						new DropIndexCRO()
@@ -465,6 +468,7 @@ public class DataModelComparator {
 
 	private void addAddIndexChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
 			ComparisonResultCRO result) {
+		LOG.debug("checking for indices to add");
 		sourceModel
 				.getSchemata()
 				.entrySet()
@@ -504,19 +508,12 @@ public class DataModelComparator {
 	}
 
 	private boolean isTableLacksIndex(TableCMO table, IndexCMO index) {
-		LOG
-				.debug(
-						String
-								.format(
-										"table '%s' has not index '%s': %b",
-										table.getName(),
-										index.getName(),
-										(!table.hasIndex(index))));
+		LOG.debug("table '{}' has not index '{}': {}", table.getName(), index.getName(), (!table.hasIndex(index)));
 		return !table.hasIndex(index);
 	}
 
 	private void addAddIndexCROToResult(ComparisonResultCRO result, TableCMO table, IndexCMO index, String schemaName) {
-		LOG.debug("add index CRO for table '" + table.getName() + "' and index '" + index.getName() + "'");
+		LOG.debug("add index CRO for table '{}' and index '{}'", table.getName(), index.getName());
 		result
 				.addChangeActions(
 						new AddIndexCRO()
