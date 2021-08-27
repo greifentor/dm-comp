@@ -94,7 +94,11 @@ public class TableCMO {
 	}
 
 	private boolean containsIndexMember(IndexCMO index, ColumnCMO column) {
-		return index.getMemberColumns().entrySet().stream().anyMatch(column0 -> column0.getValue().equals(column));
+		return index
+				.getMemberColumns()
+				.entrySet()
+				.stream()
+				.anyMatch(column0 -> column0.getValue().getName().equals(column.getName()));
 	}
 
 	public boolean isPrimaryKeyMember(String columnName) {
