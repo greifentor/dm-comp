@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import de.ollie.dbcomp.comparator.model.ChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.ComparisonResultCRO;
+import de.ollie.dbcomp.comparator.model.actions.AddAutoIncrementChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddColumnChangeActionCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddForeignKeyCRO;
 import de.ollie.dbcomp.comparator.model.actions.AddIndexCRO;
@@ -69,6 +70,7 @@ public class DataModelComparator {
 		ComparisonResultCRO result = new ComparisonResultCRO();
 		addCreateTableChangeActions(sourceModel, targetModel, result);
 		addAddAutoIncrementChangeActions(sourceModel, targetModel, result);
+		addDropAutoIncrementChangeActions(sourceModel, targetModel, result);
 		addDropTableChangeActions(sourceModel, targetModel, result);
 		addAddColumnChangeActions(sourceModel, targetModel, result);
 		addDropColumnChangeActions(sourceModel, targetModel, result);
@@ -139,7 +141,48 @@ public class DataModelComparator {
 
 	private void addAddAutoIncrementChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
 			ComparisonResultCRO result) {
+		sourceModel
+				.getSchemata()
+				.entrySet()
+				.stream()
+				.map(Entry::getValue)
+				.forEach(
+						schema -> schema
+								.getTables()
+								.entrySet()
+								.stream()
+								.map(Entry::getValue)
+								.filter(table -> hasTable(targetModel, schema.getName(), table.getName()))
+								.forEach(
+										table -> table
+												.getColumns()
+												.entrySet()
+												.stream()
+												.map(Entry::getValue)
+												.filter(column -> Boolean.TRUE.equals(column.getAutoIncrement()))
+												.forEach(column -> {
+													if (getColumn(
+															targetModel,
+															schema.getName(),
+															table.getName(),
+															column.getName())
+																	.map(
+																			c -> !Boolean.TRUE
+																					.equals(c.getAutoIncrement()))
+																	.orElse(false)) {
+														result
+																.addChangeActions(
+																		new AddAutoIncrementChangeActionCRO()
+																				.setColumnName(column.getName())
+																				.setSchemaName(schema.getName())
+																				.setTableName(table.getName()));
+													}
+												})));
+	}
 
+	private void addDropAutoIncrementChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
+			ComparisonResultCRO result) {
+		// TODO
 	}
 
 	private void addDropTableChangeActions(DataModelCMO sourceModel, DataModelCMO targetModel,
