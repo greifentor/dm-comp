@@ -55,8 +55,8 @@ public class ChangeActionToDatabaseChangeLogConverterTest {
 			+ ".w3"
 			+ ".org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog-ext "
 			+ "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro "
-			+ "http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog "
-			+ "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd\">\n";
+			+ "http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd http://www.liquibase.org/xml/ns/dbchangelog "
+			+ "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd\">\n";
 
 	@Spy
 	private ChangeProcessorConfiguration configuration;
