@@ -49,6 +49,7 @@ public class DataModelComparator {
 
 	private static final AutoIncrementHelper autoIncrementHelper = new AutoIncrementHelper();
 	private static final PrimaryKeyComparator primaryKeyComparator = new PrimaryKeyComparator();
+	private static final SQLTypeComparator sqlTypeComparator = new SQLTypeComparator();
 	private static final TypeConverter typeConverter = new TypeConverter();
 
 	/**
@@ -329,7 +330,10 @@ public class DataModelComparator {
 		getColumn(model, schemaName, tableName, columnName)
 				.filter(column -> !column.getType().equals(type) || (column.isNullable() != nullable))
 				.ifPresent(column -> {
-					if (!column.getType().equals(type)) {
+					if (!sqlTypeComparator.isEqual(column.getType(), type)) {
+						LOG.info("TYPE DIFFERENCE: " + tableName + "." + columnName);
+						LOG.info("target: " + column.getType());
+						LOG.info("source: " + type);
 						result
 								.addChangeActions(
 										new ModifyDataTypeCRO()
@@ -338,6 +342,9 @@ public class DataModelComparator {
 												.setSchemaName(schemaName)
 												.setTableName(tableName));
 					} else if (column.isNullable() != nullable) {
+						LOG.info("NOT NULL DIFFERENCE: " + tableName + "." + columnName);
+						LOG.info("target: " + column.isNullable());
+						LOG.info("source: " + nullable);
 						result
 								.addChangeActions(
 										new ModifyNullableCRO()
